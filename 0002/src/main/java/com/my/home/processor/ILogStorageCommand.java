@@ -1,4 +1,4 @@
-package com.my.home;
+package com.my.home.processor;
 
 /**
  *  Command defines how the storage should work with some data

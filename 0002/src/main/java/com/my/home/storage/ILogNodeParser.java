@@ -1,4 +1,4 @@
-package com.my.home;
+package com.my.home.storage;
 
 import com.my.home.log.beans.LogNode;
 

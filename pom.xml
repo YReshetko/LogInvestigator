@@ -42,6 +42,7 @@
         <module>0002</module>
         <!--Implementation of Mongo storage-->
         <module>0003</module>
+        <module>0004</module>
 
     </modules>
 

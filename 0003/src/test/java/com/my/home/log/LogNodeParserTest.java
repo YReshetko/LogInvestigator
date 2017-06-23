@@ -1,14 +1,15 @@
 package com.my.home.log;
 
 import com.google.gson.Gson;
+import com.my.home.base.DataToTest;
 import com.my.home.base.TestBase;
+import com.my.home.base.TestUtils;
 import com.my.home.log.beans.LogNode;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
@@ -49,7 +50,7 @@ public class LogNodeParserTest extends TestBase
 
         assertEquals("2016-08-26", node.getDate());
         assertEquals("13:53:11", node.getTime());
-        assertEquals("277", node.getMillisecond());
+        assertEquals("217", node.getMillisecond());
         assertEquals("DEBUG", node.getLogLevel());
         assertEquals("WorkManager(2)-43", node.getThread());
         assertEquals("com.datalex.matrix.servants.resolution.utils.AdaptorResolverUtils", node.getClassPackage());
@@ -87,132 +88,8 @@ public class LogNodeParserTest extends TestBase
         String testCase1 = loadFile(INPUT_SUB_DIR + fileName);
         Gson gson = new Gson();
         DataToTest settings = (DataToTest) gson.fromJson(testCase1, DataToTest.class);
-        setUpParser(settings);
+        TestUtils.setUpParser(m_toTest, settings);
         return settings;
     }
 
-    /**
-     * Set up m_toTest to test
-     * @param settings - settings for m_toTest
-     */
-    private void setUpParser(DataToTest settings)
-    {
-        m_toTest.setCommonStampPattern(settings.getCommonStampPattern());
-        m_toTest.setCommonDataTimePattern(settings.getCommonDataTimePattern());
-        m_toTest.setDatePattern(settings.getDatePattern());
-        m_toTest.setTimePattern(settings.getTimePattern());
-        m_toTest.setMillisecondsPattern(settings.getMillisecondsPattern());
-        m_toTest.setLogLevelPattern(settings.getLogLevelPattern());
-        m_toTest.setThreadPatten(settings.getThreadPatten());
-        m_toTest.setClassPattern(settings.getClassPattern());
-        m_toTest.setDateFormat(settings.getDateFormat());
-        m_toTest.setTimeFormat(settings.getTimeFormat());
-        m_toTest.init();
-    }
-
-    /**
-     * Class for settings to set up parser
-     */
-    private class DataToTest
-    {
-        private String commonStampPattern;
-        private String commonDataTimePattern;
-        private String datePattern;
-        private String timePattern;
-        private String millisecondsPattern;
-        private String logLevelPattern;
-        private String threadPatten;
-        private String classPattern;
-        private String dateFormat;
-        private String timeFormat;
-        private ArrayList<String> stringsToTest;
-
-        private String getCommonStampPattern() {
-            return commonStampPattern;
-        }
-
-        private void setCommonStampPattern(String commonStampPattern) {
-            this.commonStampPattern = commonStampPattern;
-        }
-
-        private String getCommonDataTimePattern() {
-            return commonDataTimePattern;
-        }
-
-        private void setCommonDataTimePattern(String commonDataTimePattern) {
-            this.commonDataTimePattern = commonDataTimePattern;
-        }
-
-        private String getDatePattern() {
-            return datePattern;
-        }
-
-        private void setDatePattern(String datePattern) {
-            this.datePattern = datePattern;
-        }
-
-        private String getTimePattern() {
-            return timePattern;
-        }
-
-        private void setTimePattern(String timePattern) {
-            this.timePattern = timePattern;
-        }
-
-        private String getMillisecondsPattern() {
-            return millisecondsPattern;
-        }
-
-        private void setMillisecondsPattern(String millisecondsPattern) {
-            this.millisecondsPattern = millisecondsPattern;
-        }
-
-        private String getLogLevelPattern() {
-            return logLevelPattern;
-        }
-
-        private void setLogLevelPattern(String logLevelPattern) {
-            this.logLevelPattern = logLevelPattern;
-        }
-
-        private String getThreadPatten() {
-            return threadPatten;
-        }
-
-        private void setThreadPatten(String threadPatten) {
-            this.threadPatten = threadPatten;
-        }
-
-        private String getClassPattern() {
-            return classPattern;
-        }
-
-        private void setClassPattern(String classPattern) {
-            this.classPattern = classPattern;
-        }
-
-        private String getDateFormat() {
-            return dateFormat;
-        }
-
-        private void setDateFormat(String dateFormat) {
-            this.dateFormat = dateFormat;
-        }
-
-        private String getTimeFormat() {
-            return timeFormat;
-        }
-
-        private void setTimeFormat(String timeFormat) {
-            this.timeFormat = timeFormat;
-        }
-
-        private ArrayList<String> getStringsToTest() {
-            return stringsToTest;
-        }
-
-        private void setStringsToTest(ArrayList<String> stringsToTest) {
-            this.stringsToTest = stringsToTest;
-        }
-    }
 }

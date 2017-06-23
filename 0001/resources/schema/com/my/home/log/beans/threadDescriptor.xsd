@@ -8,6 +8,7 @@
         <xsd:sequence>
             <xsd:element name="nodesNumbers" maxOccurs="unbounded" type="xsd:string"/>
         </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:long"/>
         <xsd:attribute name="name" type="xsd:string"/>
         <xsd:attribute name="startTime" type="xsd:long"/>
         <xsd:attribute name="endTime" type="xsd:long"/>

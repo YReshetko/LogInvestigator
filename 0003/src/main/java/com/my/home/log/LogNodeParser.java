@@ -1,7 +1,7 @@
 package com.my.home.log;
 
-import com.my.home.ILogNodeParser;
 import com.my.home.log.beans.LogNode;
+import com.my.home.storage.ILogNodeParser;
 
 import java.text.DateFormat;
 import java.text.ParseException;

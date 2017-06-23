@@ -5,6 +5,7 @@
             xmlns="urn:beans.log.home.my.com"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:complexType name="LogNode">
+        <xsd:attribute name="id" type="xsd:long"/>
         <xsd:attribute name="date" type="xsd:string"/>
         <xsd:attribute name="time" type="xsd:string"/>
         <xsd:attribute name="millisecond" type="xsd:string"/>

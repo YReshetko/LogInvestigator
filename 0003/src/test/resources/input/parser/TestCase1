@@ -11,6 +11,7 @@
     "timeFormat" : "HH:mm:ss",
     "stringsToTest" : [
         "2016-08-26 13:53:11,248 [DEBUG] [WorkManager(2)-71] [com.datalex.m3.servants.reservation.retrieve.bean.ReservationRetrieveSvBean] logServantTimestamp: true",
+        "2016-08-26 13:53:11,217 [DEBUG] [WorkManager(2)-43] [com.datalex.matrix.servants.resolution.utils.AdaptorResolverUtils] Number of validated point of sale override configurations being returned is 1",
         "2016-08-26 13:53:11,277 [DEBUG] [WorkManager(2)-43] [com.datalex.matrix.servants.resolution.utils.AdaptorResolverUtils] Number of validated point of sale override configurations being returned is 1"
     ]
 }
