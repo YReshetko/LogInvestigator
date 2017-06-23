@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:beans.log.home.my.com"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            xmlns="urn:beans.log.home.my.com"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:complexType name="ThreadsSet">
+        <xsd:sequence>
+            <xsd:element name="names" maxOccurs="unbounded" type="xsd:string"/>
+        </xsd:sequence>
+        <xsd:attribute name="path" type="xsd:string"/>
+    </xsd:complexType>
+</xsd:schema>

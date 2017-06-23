@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:beans.log.home.my.com"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            xmlns="urn:beans.log.home.my.com"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:complexType name="ThreadDescriptor">
+        <xsd:sequence>
+            <xsd:element name="nodesNumbers" maxOccurs="unbounded" type="xsd:string"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="startTime" type="xsd:long"/>
+        <xsd:attribute name="endTime" type="xsd:long"/>
+    </xsd:complexType>
+</xsd:schema>

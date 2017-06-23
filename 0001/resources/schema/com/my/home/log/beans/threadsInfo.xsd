@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:beans.log.home.my.com"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            xmlns="urn:beans.log.home.my.com"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:complexType name="ThreadsInfo">
+        <xsd:sequence>
+            <xsd:element name="threads" maxOccurs="unbounded" type="ThreadEntry"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ThreadEntry">
+        <xsd:attribute name="threadName" type="xsd:string" use="required"/>
+        <xsd:attribute name="fileName" type="xsd:string" use="required"/>
+        <xsd:attribute name="startTime" type="xsd:long" use="required"/>
+        <xsd:attribute name="endTime" type="xsd:long" use="required"/>
+        <xsd:attribute name="isDelete" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+</xsd:schema>

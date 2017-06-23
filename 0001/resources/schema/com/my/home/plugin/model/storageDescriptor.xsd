@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:model.plugin.home.my.com"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            xmlns="urn:model.plugin.home.my.com"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:complexType name="StorageDescriptor">
+        <xsd:sequence>
+            <xsd:element name="plugins" maxOccurs="unbounded" type="Plugins"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="Plugins">
+        <xsd:sequence>
+            <xsd:element name="versions" maxOccurs="unbounded" type="PluginVersion"/>
+        </xsd:sequence>
+        <xsd:attribute name="folder" type="xsd:string"/>
+        <xsd:attribute name="packageName" type="xsd:string"/>
+        <xsd:attribute name="className" type="xsd:string"/>
+        <xsd:attribute name="label" type="xsd:string"/>
+    </xsd:complexType>
+    <xsd:complexType name="PluginVersion">
+        <xsd:attribute name="folder" type="xsd:string"/>
+        <xsd:attribute name="version" type="xsd:int"/>
+    </xsd:complexType>
+</xsd:schema>

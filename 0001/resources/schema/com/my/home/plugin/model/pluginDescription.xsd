@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:model.plugin.home.my.com"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            xmlns="urn:model.plugin.home.my.com"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:complexType name="Plugin">
+        <xsd:sequence>
+            <xsd:element name="description" maxOccurs="1" type="PluginDescription"/>
+        </xsd:sequence>
+        <xsd:attribute name="version" type="xsd:int"/>
+    </xsd:complexType>
+    <xsd:complexType name="PluginDescription">
+        <xsd:attribute name="packageName" type="xsd:string"/>
+        <xsd:attribute name="className" type="xsd:string"/>
+        <xsd:attribute name="shortDescription" type="xsd:string"/>
+        <xsd:attribute name="label" type="xsd:string"/>
+        <xsd:attribute name="fullDescription" type="xsd:string"/>
+        <xsd:attribute name="pluginType" type="PluginType"/>
+    </xsd:complexType>
+    <xsd:simpleType name="PluginType">
+        <xsd:restriction base="xsd:string">
+            <!-- Create labels on threads -->
+            <xsd:enumeration value="STAMPER"/>
+            <!-- Collect information from threads -->
+            <xsd:enumeration value="PROCESSOR"/>
+            <!-- Filtering out threads from unnecessary information-->
+            <xsd:enumeration value="FILTER"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>
