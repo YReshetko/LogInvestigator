@@ -22,7 +22,7 @@
         <property name="timeFormat" value="HH:mm:ss"/>
     </bean>
     <bean id="MongoConnection" class="com.my.home.storage.mongo.impl.MongoConnection" lazy-init="true" init-method="init" destroy-method="closeConnection">
-        <property name="host" value="172.29.29.241"/>
+        <property name="host" value="localhost"/>
         <property name="port" value="27017"/>
         <property name="dbName" value="log"/>
     </bean>
