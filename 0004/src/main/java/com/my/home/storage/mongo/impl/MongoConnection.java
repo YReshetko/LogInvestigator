@@ -13,6 +13,8 @@ import java.util.Map;
  */
 public class MongoConnection
 {
+
+
     private String host;
     private int port;
     private String dbName;
@@ -52,6 +54,30 @@ public class MongoConnection
     public void finalize()
     {
         closeConnection();
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
     }
 
 }

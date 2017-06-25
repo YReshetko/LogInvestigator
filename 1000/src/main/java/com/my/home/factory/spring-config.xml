@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="StorageContext" class="com.my.home.beans.LogStorageTestContext" lazy-init="true">
+        <property name="parser" ref="LogNodeParser"/>
+        <property name="saver" ref="LogSaver"/>
+    </bean>
+
+    <bean id="LogNodeParser" class="com.my.home.log.LogNodeParser" lazy-init="true" init-method="init">
+        <property name="commonStampPattern" value="D T,M \[L\] \[S\] \[C\] "/>
+        <!--property name="commonStampPattern" value="T"/-->
+        <property name="commonDataTimePattern" value="D T,M"/>
+        <property name="datePattern" value="[0-9]{4}\-[0-9]{2}\-[0-9]{2}"/>
+        <property name="timePattern" value="[0-9]{2}\:[0-9]{2}\:[0-9]{2}"/>
+        <property name="millisecondsPattern" value="[0-9]{3}"/>
+        <property name="logLevelPattern" value="[A-Z ]+"/>
+        <property name="threadPatten" value=".+?"/>
+        <property name="classPattern" value="[[a-z0-9]+\.]+[A-Z]{1}[a-zA-Z0-9]+"/>
+        <property name="dateFormat" value="yyyy-MM-dd"/>
+        <property name="timeFormat" value="HH:mm:ss"/>
+    </bean>
+    <bean id="MongoConnection" class="com.my.home.storage.mongo.impl.MongoConnection" lazy-init="true" init-method="init" destroy-method="closeConnection">
+        <property name="host" value="172.29.29.241"/>
+        <property name="port" value="27017"/>
+        <property name="dbName" value="log"/>
+    </bean>
+    <bean id="LogSaver" class="com.my.home.storage.mongo.impl.MongoLogSaver" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+</beans>

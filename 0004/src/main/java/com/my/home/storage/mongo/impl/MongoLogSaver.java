@@ -12,11 +12,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Yurchik
- * Date: 25.06.17
- * Time: 6:41
- * To change this template use File | Settings | File Templates.
+ * Implementation of log saver on mongo DB
  */
 public class MongoLogSaver implements ILogSaver
 {
