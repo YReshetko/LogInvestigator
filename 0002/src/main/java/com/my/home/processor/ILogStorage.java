@@ -13,8 +13,27 @@ import java.util.List;
  */
 public interface ILogStorage
 {
+    /**
+     * Parses log files and save it into storage
+     * @param identifier - identifier of log
+     * @param files - list of log files
+     */
     void process(ILogIdentifier identifier, List<File> files);
+
+    /**
+     * Retrieves iterator of log nodes for command
+     * @param identifier - identifier of log
+     * @param command - determines what log we need to retrieve
+     * @return - list of log nodes
+     */
     Iterator<LogNode> getIterator(ILogIdentifier identifier, ILogStorageCommand command);
+
+    /**
+     *
+     * @param identifier
+     * @param command
+     * @return
+     */
     boolean changeLog(ILogIdentifier identifier, ILogStorageCommand command);
 
     void setStorageContext(ILogStorageContext context);

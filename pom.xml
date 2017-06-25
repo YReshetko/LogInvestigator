@@ -34,14 +34,21 @@
             <version>0.13.1</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.4.2</version>
+        </dependency>
     </dependencies>
     <modules>
         <!--XSD schemes of model-->
         <module>0001</module>
         <!--Interface of log storage-->
         <module>0002</module>
-        <!--Implementation of Mongo storage-->
+        <!--Implementation of storage processing-->
         <module>0003</module>
+        <!--Mongo implementation of storage-->
         <module>0004</module>
 
     </modules>

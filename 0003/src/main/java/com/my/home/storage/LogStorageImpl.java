@@ -152,6 +152,7 @@ public class LogStorageImpl implements ILogStorage
                 logBlock = new LogBlock();
                 logBlock.setFileName(file.getAbsolutePath());
                 logBlock.setSize(file.length());
+                br = new BufferedReader(new FileReader(file));
                 while ((line = br.readLine()) != null)
                 {
                     if(parser.hasStamp(line))
