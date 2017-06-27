@@ -26,7 +26,7 @@ public interface ILogStorage
      * @param command - determines what log we need to retrieve
      * @return - list of log nodes
      */
-    Iterator<LogNode> getIterator(ILogIdentifier identifier, ILogStorageCommand command);
+    <V> Iterator<V> getIterator(ILogIdentifier identifier, ILogStorageCommand<V> command);
 
     /**
      *
@@ -34,7 +34,19 @@ public interface ILogStorage
      * @param command
      * @return
      */
+    String getLog(ILogIdentifier identifier, ILogStorageCommand<LogNode> command);
+
+    /**
+     * Use for updating, removing etc
+     * @param identifier - identifier of log
+     * @param command - command to execute
+     * @return - true if success
+     */
     boolean changeLog(ILogIdentifier identifier, ILogStorageCommand command);
 
+    /**
+     * Setup storage context
+     * @param context - context, contains implementations of parser, saver, retriever etc
+     */
     void setStorageContext(ILogStorageContext context);
 }

@@ -7,6 +7,7 @@ import com.my.home.storage.ILogIdentifier;
 import com.my.home.storage.ILogSaver;
 import com.my.home.storage.mongo.IMongoAccess;
 import com.my.home.storage.mongo.wrapper.WrapperToSave;
+import com.my.home.util.JsonUtils;
 
 import java.io.File;
 import java.util.List;
@@ -14,39 +15,34 @@ import java.util.List;
 /**
  * Implementation of log saver on mongo DB
  */
-public class MongoLogSaver implements ILogSaver
+public class MongoLogSaver extends MongoLogBase implements ILogSaver
 {
-    private static final String NODES_COLLECTION = "nodes";
-    private static final String THREADS_COLLECTION = "threads";
-    private static final String INFO_COLLECTION = "info";
-    private MongoConnection connection;
     public MongoLogSaver(MongoConnection connection)
     {
-        this.connection = connection;
+        super(connection);
     }
     @Override
     public boolean saveNode(ILogIdentifier identifier, LogNode node)
     {
-        return saveObject(NODES_COLLECTION, identifier, node);
+        return save(identifier, node);
     }
 
     @Override
     public boolean saveThreadsInfo(ILogIdentifier identifier, ThreadsInfo threadsInfo) {
-        return saveObject(INFO_COLLECTION, identifier, threadsInfo);
+        return save(identifier, threadsInfo);
     }
 
     @Override
     public boolean saveThreadDescriptor(ILogIdentifier identifier, ThreadDescriptor descriptor) {
-        return saveObject(THREADS_COLLECTION, identifier, descriptor);
+        return save(identifier, descriptor);
     }
 
-    private <V> boolean saveObject(String collection, ILogIdentifier identifier, V value)
-    {
-        IMongoAccess access = connection.getAccess(collection);
-        WrapperToSave<V> toSave = new WrapperToSave<V>(identifier, value);
-        access.insert(toSave.getRecordToSave());
+    private <V> boolean save(ILogIdentifier identifier, V value) {
+        IMongoAccess access = getAccess(identifier, getCollection(value.getClass()));
+        access.insert(JsonUtils.getJson(value));
         return true;
     }
+
 
     @Override
     public boolean complete(ILogIdentifier identifier, List<File> files) {

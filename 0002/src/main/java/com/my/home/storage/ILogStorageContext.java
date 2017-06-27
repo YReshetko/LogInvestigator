@@ -11,4 +11,5 @@ public interface ILogStorageContext
 {
     ILogNodeParser getParser();
     ILogSaver getSaver();
+    ILogRetriever getRetriever();
 }

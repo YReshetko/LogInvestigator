@@ -16,8 +16,10 @@ import java.util.*;
  */
 public class LogStorageImpl implements ILogStorage
 {
+    private static final String NEW_LINE = "\n";
     private ILogNodeParser parser;
     private ILogSaver saver;
+    private ILogRetriever retriever;
     @Override
     public void process(ILogIdentifier identifier, List<File> files)
     {
@@ -40,6 +42,7 @@ public class LogStorageImpl implements ILogStorage
             for (LogBlock block : blocks)
             {
                 String file = block.getFileName();
+                // TODO investigate how to read file via NIO
                 br = new BufferedReader(new FileReader(file));
                 while ((line = br.readLine()) != null)
                 {
@@ -121,11 +124,27 @@ public class LogStorageImpl implements ILogStorage
     public void setStorageContext(ILogStorageContext iLogStorageContext) {
         this.parser = iLogStorageContext.getParser();
         this.saver = iLogStorageContext.getSaver();
+        this.retriever = iLogStorageContext.getRetriever();
     }
 
     @Override
-    public Iterator<LogNode> getIterator(ILogIdentifier identifier, ILogStorageCommand command) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public <V> Iterator<V> getIterator(ILogIdentifier identifier, ILogStorageCommand<V> command)
+    {
+        command.setData(identifier);
+        return retriever.get(identifier, command);
+    }
+
+    @Override
+    public String getLog(ILogIdentifier identifier, ILogStorageCommand<LogNode> iLogStorageCommand)
+    {
+        Iterator<LogNode> nodes = getIterator(identifier, iLogStorageCommand);
+        StringBuilder buffer = new StringBuilder();
+        while (nodes.hasNext())
+        {
+            buffer.append(parser.parse(nodes.next()));
+            buffer.append(NEW_LINE);
+        }
+        return buffer.toString();
     }
 
     @Override

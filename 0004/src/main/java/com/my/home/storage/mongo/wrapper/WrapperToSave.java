@@ -19,6 +19,7 @@ public class WrapperToSave<V>
 
     public String getRecordToSave()
     {
+        //  TODO Double conversion from/to JSON (2)
         String val = JsonUtils.getJson(value);
         return String.format(DBRequestTemplates.TO_SAVE, key, val);
     }

@@ -74,6 +74,7 @@ public class LogStorageImplTest extends TestBase
     {
         ILogNodeParser parser;
         ILogSaver saver;
+        ILogRetriever retriever;
         public StorageContextTest(ILogNodeParser parser)
         {
             this.parser = parser;
@@ -87,6 +88,11 @@ public class LogStorageImplTest extends TestBase
         @Override
         public ILogSaver getSaver() {
             return saver;
+        }
+
+        @Override
+        public ILogRetriever getRetriever() {
+            return retriever;
         }
     }
     private class TestSaver implements ILogSaver

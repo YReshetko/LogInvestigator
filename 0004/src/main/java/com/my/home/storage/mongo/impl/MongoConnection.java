@@ -31,13 +31,13 @@ public class MongoConnection
         accesses = new HashMap<>();
     }
 
-    public IMongoAccess getAccess(String collection)
+    public <V> IMongoAccess<V> getAccess(String collection, Class<V> type)
     {
         MongoAccess access = accesses.get(collection);
         if (access == null)
         {
             DBCollection mongoCollection = db.getCollection(collection);
-            access = new MongoAccess(mongoCollection);
+            access = new MongoAccess(mongoCollection, type);
             accesses.put(collection, access);
         }
         return access;

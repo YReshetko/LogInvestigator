@@ -6,6 +6,7 @@
     <bean id="StorageContext" class="com.my.home.beans.LogStorageTestContext" lazy-init="true">
         <property name="parser" ref="LogNodeParser"/>
         <property name="saver" ref="LogSaver"/>
+        <property name="retriever" ref="LogRetriever"/>
     </bean>
 
     <bean id="LogNodeParser" class="com.my.home.log.LogNodeParser" lazy-init="true" init-method="init">
@@ -27,6 +28,9 @@
         <property name="dbName" value="log"/>
     </bean>
     <bean id="LogSaver" class="com.my.home.storage.mongo.impl.MongoLogSaver" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+    <bean id="LogRetriever" class="com.my.home.storage.mongo.impl.MongoLogRetriever" lazy-init="true">
         <constructor-arg ref="MongoConnection"/>
     </bean>
 </beans>

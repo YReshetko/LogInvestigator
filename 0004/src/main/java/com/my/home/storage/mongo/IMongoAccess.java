@@ -1,14 +1,15 @@
 package com.my.home.storage.mongo;
 
+
 import java.util.Iterator;
 
 /**
  *
  */
-public interface IMongoAccess
+public interface IMongoAccess<V>
 {
-    Iterator<String> findAll();
-    Iterator<String> find(String searchKey);
+    <V> Iterator<V> findAll();
+    <V> Iterator<V> find(String searchKey);
 
     void insert(String value);
 
