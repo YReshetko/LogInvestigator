@@ -4,9 +4,8 @@ import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.storage.ILogIdentifier;
-import com.my.home.storage.mongo.IMongoAccess;
+import com.my.home.storage.mongo.IMongoLogAccess;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class MongoLogBase
             collectionMap.put(logCollection.aClass, logCollection);
         }
     }
-    protected IMongoAccess getAccess(ILogIdentifier identifier, LogCollection collection)
+    protected IMongoLogAccess getAccess(ILogIdentifier identifier, LogCollection collection)
     {
         return connection.getAccess(collection.getCollectionName(identifier), collection.aClass);
     }

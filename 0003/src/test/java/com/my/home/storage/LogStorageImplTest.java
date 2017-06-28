@@ -1,6 +1,5 @@
 package com.my.home.storage;
 
-import com.google.gson.Gson;
 import com.my.home.base.DataToTest;
 import com.my.home.base.TestBase;
 import com.my.home.base.TestUtils;
@@ -9,6 +8,7 @@ import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.processor.ILogStorage;
+import com.my.home.util.JsonUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +37,7 @@ public class LogStorageImplTest extends TestBase
     {
         ILogNodeParser parser = new LogNodeParser();
         String testCase1 = loadFile( "input/parser/TestCase1");
-        Gson gson = new Gson();
-        DataToTest settings = (DataToTest) gson.fromJson(testCase1, DataToTest.class);
+        DataToTest settings = JsonUtils.getObject(testCase1, DataToTest.class);
         TestUtils.setUpParser((LogNodeParser)parser, settings);
         context = new StorageContextTest(parser);
         m_toTest = new LogStorageImpl();

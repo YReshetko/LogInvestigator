@@ -6,7 +6,7 @@ import java.util.Iterator;
 /**
  *
  */
-public interface IMongoAccess<V>
+public interface IMongoLogAccess<V>
 {
     <V> Iterator<V> findAll();
     <V> Iterator<V> find(String searchKey);

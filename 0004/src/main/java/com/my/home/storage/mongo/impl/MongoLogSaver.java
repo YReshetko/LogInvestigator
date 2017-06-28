@@ -5,8 +5,7 @@ import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.storage.ILogIdentifier;
 import com.my.home.storage.ILogSaver;
-import com.my.home.storage.mongo.IMongoAccess;
-import com.my.home.storage.mongo.wrapper.WrapperToSave;
+import com.my.home.storage.mongo.IMongoLogAccess;
 import com.my.home.util.JsonUtils;
 
 import java.io.File;
@@ -38,7 +37,7 @@ public class MongoLogSaver extends MongoLogBase implements ILogSaver
     }
 
     private <V> boolean save(ILogIdentifier identifier, V value) {
-        IMongoAccess access = getAccess(identifier, getCollection(value.getClass()));
+        IMongoLogAccess access = getAccess(identifier, getCollection(value.getClass()));
         access.insert(JsonUtils.getJson(value));
         return true;
     }

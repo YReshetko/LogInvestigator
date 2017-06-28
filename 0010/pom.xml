@@ -8,19 +8,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <dependencies>
-        <dependency>
-            <groupId>LogInvestigator</groupId>
-            <artifactId>DataModel</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../artifacts/DataModel-1.0-SNAPSHOT.jar</systemPath>
-        </dependency>
-    </dependencies>
-    <artifactId>LogStorageInterface</artifactId>
+    <artifactId>ProjectUtils</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>LogStorageInterface</name>
+    <name>ProjectUtils</name>
 
 </project>

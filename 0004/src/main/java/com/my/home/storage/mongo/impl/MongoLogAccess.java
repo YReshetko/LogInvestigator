@@ -4,21 +4,20 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.my.home.storage.mongo.IMongoAccess;
+import com.my.home.storage.mongo.IMongoLogAccess;
 import com.my.home.util.JsonUtils;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Iterator;
 
 /**
  *
  */
-public class MongoAccess<V> implements IMongoAccess<V>
+public class MongoLogAccess<V> implements IMongoLogAccess<V>
 {
 
     private DBCollection collection;
     private Class aClass;
-    public MongoAccess(DBCollection collection, Class aClass)
+    public MongoLogAccess(DBCollection collection, Class aClass)
     {
         this.collection = collection;
         this.aClass = aClass;

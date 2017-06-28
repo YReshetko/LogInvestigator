@@ -1,6 +1,11 @@
 import com.my.home.beans.TestLogIdentifier;
 import com.my.home.factory.SpringBeanFactory;
 import com.my.home.log.beans.LogNode;
+import com.my.home.plugin.IPluginFactory;
+import com.my.home.plugin.IPluginProcessor;
+import com.my.home.plugin.IPluginStorage;
+import com.my.home.plugin.model.PluginToStore;
+import com.my.home.plugin.model.PluginType;
 import com.my.home.processor.ILogStorage;
 import com.my.home.processor.ILogStorageCommand;
 import com.my.home.storage.ILogIdentifier;
@@ -21,12 +26,57 @@ import java.util.List;
 public class Runner
 {
     private static final String LOG_FOLDER = "1000/src/main/resources/logToTest/";
+    private static final String PLUGIN_FROM_FOLDER = "1000/src/main/resources/plugins/from/";
+    private static final String PLUGIN_TO_FOLDER = "1000/src/main/resources/plugins/to/";
+    private static final String PLUGIN_FILE_NAME = "Plugin1-1.0-SNAPSHOT.jar";
     private static final String LOG_FILE_NAME_TEMPLATE = "matrixtdp_0%s.log";
     private static final String THREADS_FILE = "ListOfThreads";
     private static final int FILES_NUMBER = 6;
     public static void main(String[] args)
     {
+        //testLogStorage();
+        testPluginStorage();
+    }
 
+    private static void testPluginStorage()
+    {
+        IPluginFactory factory = (IPluginFactory) SpringBeanFactory.getInstance().getBean("PluginFactory");
+        IPluginStorage storage = (IPluginStorage) SpringBeanFactory.getInstance().getBean("PluginStorage");
+
+        factory.savePlugin(new File(PLUGIN_FROM_FOLDER + PLUGIN_FILE_NAME));
+        List<PluginToStore> plugs = storage.get();
+        PluginToStore pluginToTake = plugs.get(2);
+        long time = System.currentTimeMillis();
+        if (pluginToTake.getType() == PluginType.PROCESSOR)
+        {
+            IPluginProcessor processor = factory.getPlugin(pluginToTake);
+            ILogStorageContext context = (ILogStorageContext)SpringBeanFactory.getInstance().getBean("StorageContext");
+            ILogStorage logStorage = new LogStorageImpl();
+            logStorage.setStorageContext(context);
+            ILogIdentifier identifier = new TestLogIdentifier("randomKey");
+
+
+            ILogStorageCommand<LogNode> command = new FindNodesCommand();
+            LogNode node1 = new LogNode();
+            LogNode node2 = new LogNode();
+
+            node1.setThread("WorkManager(2)-43");
+            node2.setThread("WorkManager(2)-84");
+            //command.setData(node1, node2);
+            command.setData(getAllThreads());
+            Iterator<LogNode> iter = logStorage.getIterator(identifier, command);
+            while (iter.hasNext())
+            {
+                processor.process(iter.next());
+                //System.out.println(iter.next().getMessage());
+            }
+            System.out.println(processor.getResult());
+        }
+        time = System.currentTimeMillis() - time;
+        System.out.println("Time to save : " + time + " ms.");
+    }
+    private static void testLogStorage()
+    {
         ILogStorageContext context = (ILogStorageContext)SpringBeanFactory.getInstance().getBean("StorageContext");
         ILogStorage storage = new LogStorageImpl();
         storage.setStorageContext(context);
@@ -43,8 +93,6 @@ public class Runner
         retrieveData(storage, identifier);
         time = System.currentTimeMillis() - time;
         System.out.println("Time to retrieve : " + time + " ms.");
-
-
     }
     private static void uploadData(ILogStorage storage, ILogIdentifier identifier)
     {
