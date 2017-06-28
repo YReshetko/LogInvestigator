@@ -3,7 +3,7 @@ package com.my.home.storage.mongo.impl;
 import com.my.home.processor.ILogStorageCommand;
 import com.my.home.storage.ILogIdentifier;
 import com.my.home.storage.ILogRetriever;
-import com.my.home.storage.mongo.IMongoAccess;
+import com.my.home.storage.mongo.IMongoLogAccess;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ public class MongoLogRetriever extends MongoLogBase implements ILogRetriever
     {
         Class<V> vClass = (Class<V>) ((ParameterizedType) iLogStorageCommand.getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
-        IMongoAccess<V> access = getAccess(identifier, getCollection(vClass));
+        IMongoLogAccess<V> access = getAccess(identifier, getCollection(vClass));
         String command = iLogStorageCommand.getCommand();
         Iterator<V> out = null;
         if(command == null)

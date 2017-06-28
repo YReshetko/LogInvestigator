@@ -33,4 +33,13 @@
     <bean id="LogRetriever" class="com.my.home.storage.mongo.impl.MongoLogRetriever" lazy-init="true">
         <constructor-arg ref="MongoConnection"/>
     </bean>
+    <bean id="PluginFactory" class="com.my.home.plugin.PluginFactoryImpl" lazy-init="true">
+        <constructor-arg ref="PluginStorage" index="0"/>
+        <constructor-arg value="1000/src/main/resources/plugins/to/" index="1"/>
+    </bean>
+
+    <bean id="PluginStorage" class="com.my.home.storage.mongo.plugin.MongoPluginStorage" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+
 </beans>

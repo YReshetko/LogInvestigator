@@ -42,6 +42,8 @@
         </dependency>
     </dependencies>
     <modules>
+        <!--CommonUtils-->
+        <module>0010</module>
         <!--XSD schemes of model-->
         <module>0001</module>
         <!--Interface of log storage-->
@@ -50,6 +52,9 @@
         <module>0003</module>
         <!--Mongo implementation of storage-->
         <module>0004</module>
+        <!--Factory of plugins-->
+        <module>0005</module>
+
 
     </modules>
 
@@ -86,6 +91,28 @@
                             <outputDirectory>
                                 ${basedir}/../lib
                             </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>../artifacts</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>target</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

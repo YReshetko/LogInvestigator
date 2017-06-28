@@ -1,10 +1,10 @@
 package com.my.home.log;
 
-import com.google.gson.Gson;
 import com.my.home.base.DataToTest;
 import com.my.home.base.TestBase;
 import com.my.home.base.TestUtils;
 import com.my.home.log.beans.LogNode;
+import com.my.home.util.JsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -86,8 +86,7 @@ public class LogNodeParserTest extends TestBase
     private DataToTest initParserWithFile(String fileName) throws IOException
     {
         String testCase1 = loadFile(INPUT_SUB_DIR + fileName);
-        Gson gson = new Gson();
-        DataToTest settings = (DataToTest) gson.fromJson(testCase1, DataToTest.class);
+        DataToTest settings = (DataToTest) JsonUtils.getObject(testCase1, DataToTest.class);
         TestUtils.setUpParser(m_toTest, settings);
         return settings;
     }
