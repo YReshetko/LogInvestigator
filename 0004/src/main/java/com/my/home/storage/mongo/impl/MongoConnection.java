@@ -15,8 +15,6 @@ import java.util.Map;
  */
 public class MongoConnection
 {
-
-
     private static final String PLUGIN_COLLECTION = "plugins";
     private String host;
     private int port;
