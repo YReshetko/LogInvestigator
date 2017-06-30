@@ -8,6 +8,7 @@ import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.processor.ILogStorage;
+import com.my.home.processor.ILogStorageCommand;
 import com.my.home.util.JsonUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,14 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Yurchik
- * Date: 24.06.17
- * Time: 17:37
- * To change this template use File | Settings | File Templates.
+ * Test of log storage implementation (save/retrieve log nodes)
  */
 public class LogStorageImplTest extends TestBase
 {
@@ -32,6 +30,10 @@ public class LogStorageImplTest extends TestBase
     private ILogStorage m_toTest;
     private ILogStorageContext context;
 
+    /**
+     * Setup method
+     * @throws Exception - unexpected exception
+     */
     @Before
     public void setUp() throws Exception
     {
@@ -44,6 +46,9 @@ public class LogStorageImplTest extends TestBase
         m_toTest.setStorageContext(context);
     }
 
+    /**
+     * Save log files and check if it pass though saver
+     */
     @Test
     public void testSaving()
     {
@@ -61,6 +66,51 @@ public class LogStorageImplTest extends TestBase
         }
     }
 
+    /**
+     * Save and retrieve log nodes
+     */
+    @Test
+    public void testRetrieving()
+    {
+        List<File> files = getFiles(Arrays.asList(
+                BASE_PATH + "File_1",
+                BASE_PATH + "File_2",
+                BASE_PATH + "File_3",
+                BASE_PATH + "File_4"));
+        m_toTest.process(new IdentifierTest(), files);
+        Iterator<LogNode> iter = m_toTest.getIterator(new IdentifierTest(), new TestLogCommand());
+        Assert.assertTrue(iter.hasNext());
+        int index = 0;
+        while (iter.hasNext())
+        {
+            ++index;
+            LogNode node = iter.next();
+            Assert.assertNotNull(node);
+        }
+        Assert.assertTrue(index > 49);
+    }
+
+    /**
+     * Save log and retrieve log nodes as text of log
+     */
+    @Test
+    public void testLogUnParsing()
+    {
+        List<File> files = getFiles(Arrays.asList(
+                BASE_PATH + "File_1",
+                BASE_PATH + "File_2",
+                BASE_PATH + "File_3",
+                BASE_PATH + "File_4"));
+        m_toTest.process(new IdentifierTest(), files);
+        String out = m_toTest.getLog(new IdentifierTest(), new TestLogCommand());
+        Assert.assertNotNull(out);
+        Assert.assertTrue(out.getBytes().length > 10000);
+    }
+
+
+    /**
+     * Test implementation of log identifier
+     */
     private class IdentifierTest implements ILogIdentifier
     {
 
@@ -69,6 +119,10 @@ public class LogStorageImplTest extends TestBase
             return "Test case";
         }
     }
+
+    /**
+     * Test implementation of storage context
+     */
     private class StorageContextTest implements ILogStorageContext
     {
         ILogNodeParser parser;
@@ -78,6 +132,7 @@ public class LogStorageImplTest extends TestBase
         {
             this.parser = parser;
             saver = new TestSaver();
+            retriever = new TestRetriever(((TestSaver)saver).nodes);
         }
         @Override
         public ILogNodeParser getParser() {
@@ -94,6 +149,10 @@ public class LogStorageImplTest extends TestBase
             return retriever;
         }
     }
+
+    /**
+     * Test implementation of saver
+     */
     private class TestSaver implements ILogSaver
     {
 
@@ -125,6 +184,61 @@ public class LogStorageImplTest extends TestBase
         @Override
         public boolean complete(ILogIdentifier identifier, List<File> files) {
             return true;
+        }
+    }
+
+    /**
+     * Test implementation of retriever
+     */
+    private class TestRetriever implements ILogRetriever
+    {
+
+
+        private List<LogNode> nodes;
+        public TestRetriever(List<LogNode> nodes)
+        {
+            this.nodes = nodes;
+        }
+        @Override
+        public <V> Iterator<V> get(ILogIdentifier identifier, ILogStorageCommand<V> viLogStorageCommand) {
+            return (Iterator<V>) nodes.iterator();
+        }
+
+        @Override
+        public void changeLog(ILogIdentifier identifier, ILogStorageCommand iLogStorageCommand) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+    }
+
+    /**
+     * Test implementation of command
+     */
+    private class TestLogCommand implements ILogStorageCommand<LogNode>
+    {
+
+        @Override
+        public void setData(LogNode... logNodes) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void setData(ILogIdentifier identifier, LogNode... logNodes) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void setData(ILogIdentifier identifier) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public ILogIdentifier getIdentifier() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public String getCommand() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }
