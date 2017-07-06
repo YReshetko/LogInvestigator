@@ -1,5 +1,7 @@
 package com.my.home.storage;
 
+import com.my.home.processor.ILogProgress;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Yurchik
@@ -12,4 +14,5 @@ public interface ILogStorageContext
     ILogNodeParser getParser();
     ILogSaver getSaver();
     ILogRetriever getRetriever();
+    ILogProgress getProgress();
 }

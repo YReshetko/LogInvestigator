@@ -44,7 +44,8 @@ public class MongoLogSaver extends MongoLogBase implements ILogSaver
 
 
     @Override
-    public boolean complete(ILogIdentifier identifier, List<File> files) {
-        return false;
+    public boolean complete(ILogIdentifier identifier)
+    {
+        return save(identifier, identifier.getLogDescriptor());
     }
 }

@@ -1,26 +1,38 @@
 package com.my.home.ui;
 
+import com.my.home.log.LogIdentifierImpl;
 import com.my.home.parser.ParserManager;
 import com.my.home.plugin.IPluginStorage;
 import com.my.home.plugin.PluginFactoryImpl;
+import com.my.home.plugin.model.PluginToStore;
+import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
+import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
 import com.my.home.storage.mongo.plugin.MongoPluginStorage;
+import com.my.home.task.AfterParseLogTask;
+import com.my.home.task.executor.AppTaskExecutor;
+import com.my.home.ui.controllers.IUIController;
+import com.my.home.ui.controllers.MainWindowController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
+import com.my.home.util.FileChooserUtil;
 import javafx.scene.Parent;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -35,6 +47,7 @@ public class App
      */
     private Stage primaryStage;
     private boolean isStageInitialized;
+    private IUIController primaryController;
     private String pluginDir;
 
 
@@ -63,13 +76,19 @@ public class App
      */
     private ILogStorage storage;
 
+    private IPluginStorage pluginStorage;
     private PluginFactoryImpl pluginFactory;
+
+    private AppTaskExecutor taskExecutor;
+
+
 
     public void init(Stage primaryStage)
     {
         isStageInitialized = false;
         modalWindows = new HashMap<>();
         this.primaryStage = primaryStage;
+        taskExecutor = new AppTaskExecutor();
         try
         {
             initApplicationContext();
@@ -90,6 +109,7 @@ public class App
         connection = storageManager.getConnection();
         initPrimaryStage();
         initNewContext();
+        primaryController.update();
     }
 
     private void initNewContext()
@@ -97,6 +117,7 @@ public class App
         final ILogSaver saver = new MongoLogSaver(connection);
         final ILogRetriever retriever = new MongoLogRetriever(connection);
         final ILogNodeParser parser = parserManager.getParser("default");
+        final ILogProgress progress = new ProgressManager(((MainWindowController) primaryController).getProgressBar());
         ILogStorageContext context = new ILogStorageContext()
         {
 
@@ -114,6 +135,11 @@ public class App
             public ILogRetriever getRetriever() {
                 return retriever;
             }
+
+            @Override
+            public ILogProgress getProgress() {
+                return progress;
+            }
         };
 
         if (storage == null)
@@ -121,7 +147,7 @@ public class App
             storage = new LogStorageImpl();
         }
         storage.setStorageContext(context);
-        IPluginStorage pluginStorage = new MongoPluginStorage(connection);
+        pluginStorage = new MongoPluginStorage(connection);
         pluginFactory = new PluginFactoryImpl(pluginStorage, pluginDir);
     }
     private void initPrimaryStage() throws Exception
@@ -134,9 +160,11 @@ public class App
             }
             isStageInitialized = true;
             WindowFactory.fillStage(this.primaryStage, windows.get("main"));
+            primaryController = WindowFactory.getController(windows.get("main"));
             this.primaryStage.setMaximized(true);
             this.primaryStage.show();
             primaryStage.setOnCloseRequest(event -> {
+                taskExecutor.interrupt();
                 storageManager.closeDB();
             });
         }
@@ -171,18 +199,21 @@ public class App
         }
 
     }
-    public File showDirChooser(DirectoryChooser chooser, String parentW)
+    public void choosePlugin()
     {
-        Stage currStage = modalWindows.get(parentW);
-        if(currStage != null && currStage.isShowing())
+        File plugin = FileChooserUtil.getFile(getStageByName(null), "Plugins", "*.jar");
+        pluginFactory.savePlugin(plugin);
+        primaryController.update();
+    }
+    public void chooseLog()
+    {
+        List<File> logFiles = FileChooserUtil.getFiles(getStageByName(null), "Log", "*.log", "*.txt");
+        if(logFiles != null)
         {
-            return chooser.showDialog(modalWindows.get(parentW));
+            ILogIdentifier identifier = new LogIdentifierImpl(logFiles, logFiles.get(0).getParentFile().getAbsolutePath());
+            Future<ILogIdentifier> future = storage.process(identifier, logFiles);
+            taskExecutor.addTask(new AfterParseLogTask(future));
         }
-        else if(primaryStage != null)
-        {
-            return chooser.showDialog(primaryStage);
-        }
-        return null;
     }
 
     public Parent getNodeFromTemplate(String doc)
@@ -234,8 +265,26 @@ public class App
         }
     }
 
+    public Stage getStageByName(String name)
+    {
+        Stage currStage = modalWindows.get(name);
+        if(currStage != null && currStage.isShowing())
+        {
+            return modalWindows.get(name);
+        }
+        else if(primaryStage != null)
+        {
+            return primaryStage;
+        }
+        return null;
+    }
+
     public ParserManager getParserManager()
     {
         return parserManager;
+    }
+    public List<PluginToStore> getPlugins()
+    {
+        return pluginStorage.get();
     }
 }
