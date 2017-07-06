@@ -1,5 +1,6 @@
 package com.my.home.storage.mongo.impl;
 
+import com.my.home.log.beans.LogFilesDescriptor;
 import com.my.home.processor.ILogStorageCommand;
 import com.my.home.storage.ILogIdentifier;
 import com.my.home.storage.ILogRetriever;

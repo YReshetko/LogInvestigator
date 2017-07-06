@@ -2,6 +2,7 @@ package com.my.home.ui.controllers;
 
 import com.my.home.factory.SpringBeanFactory;
 import com.my.home.ui.App;
+import com.my.home.util.FileChooserUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -16,6 +17,8 @@ import java.util.Properties;
  */
 public class StorageController implements IUIController
 {
+    private final static String MONGO_BIN_TITLE = "Select <%Mongo root%>/bin";
+    private final static String MONGO_DB_TITLE = "Select db location";
     @FXML
     private TextField mongoLocation;
     @FXML
@@ -43,19 +46,17 @@ public class StorageController implements IUIController
     @FXML
     private void selectMongoDir(ActionEvent event)
     {
-        selectDir("Select <%Mongo root%>/bin",mongoLocation);
+        selectDir(MONGO_BIN_TITLE, mongoLocation);
     }
     @FXML
     private void selectDbDir(ActionEvent event)
     {
-        selectDir("Select db location",dbLocation);
+        selectDir(MONGO_DB_TITLE, dbLocation);
     }
 
     private void selectDir(String title, TextField dest)
     {
-        DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle(title);
-        File selectedDirectory = app.showDirChooser(chooser, "storageOption");
+        File selectedDirectory = FileChooserUtil.showDirChooser(app.getStageByName("storageOption"), title);
         if(selectedDirectory != null)
         {
             dest.setText(selectedDirectory.getAbsolutePath());
@@ -89,5 +90,10 @@ public class StorageController implements IUIController
     @Override
     public void init() {
         showProps();
+    }
+
+    @Override
+    public void update() {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

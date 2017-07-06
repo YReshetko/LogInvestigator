@@ -4,9 +4,11 @@ import com.my.home.base.DataToTest;
 import com.my.home.base.TestBase;
 import com.my.home.base.TestUtils;
 import com.my.home.log.LogNodeParser;
+import com.my.home.log.beans.LogFilesDescriptor;
 import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
+import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
 import com.my.home.processor.ILogStorageCommand;
 import com.my.home.util.JsonUtils;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Test of log storage implementation (save/retrieve log nodes)
@@ -50,14 +54,15 @@ public class LogStorageImplTest extends TestBase
      * Save log files and check if it pass though saver
      */
     @Test
-    public void testSaving()
+    public void testSaving() throws ExecutionException, InterruptedException
     {
         List<File> files = getFiles(Arrays.asList(
                 BASE_PATH + "File_1",
                 BASE_PATH + "File_2",
                 BASE_PATH + "File_3",
                 BASE_PATH + "File_4"));
-        m_toTest.process(new IdentifierTest(), files);
+        Future<ILogIdentifier> future = m_toTest.process(new IdentifierTest(), files);
+        future.get();
         List<LogNode> nodes = ((TestSaver) context.getSaver()).nodes;
         Assert.assertTrue(nodes.size() > 0);
         for (int i = 1; i<nodes.size(); i++)
@@ -70,14 +75,15 @@ public class LogStorageImplTest extends TestBase
      * Save and retrieve log nodes
      */
     @Test
-    public void testRetrieving()
+    public void testRetrieving() throws ExecutionException, InterruptedException
     {
         List<File> files = getFiles(Arrays.asList(
                 BASE_PATH + "File_1",
                 BASE_PATH + "File_2",
                 BASE_PATH + "File_3",
                 BASE_PATH + "File_4"));
-        m_toTest.process(new IdentifierTest(), files);
+        Future<ILogIdentifier> future = m_toTest.process(new IdentifierTest(), files);
+        future.get();
         Iterator<LogNode> iter = m_toTest.getIterator(new IdentifierTest(), new TestLogCommand());
         Assert.assertTrue(iter.hasNext());
         int index = 0;
@@ -94,14 +100,15 @@ public class LogStorageImplTest extends TestBase
      * Save log and retrieve log nodes as text of log
      */
     @Test
-    public void testLogUnParsing()
+    public void testLogUnParsing() throws ExecutionException, InterruptedException
     {
         List<File> files = getFiles(Arrays.asList(
                 BASE_PATH + "File_1",
                 BASE_PATH + "File_2",
                 BASE_PATH + "File_3",
                 BASE_PATH + "File_4"));
-        m_toTest.process(new IdentifierTest(), files);
+        Future<ILogIdentifier> future = m_toTest.process(new IdentifierTest(), files);
+        future.get();
         String out = m_toTest.getLog(new IdentifierTest(), new TestLogCommand());
         Assert.assertNotNull(out);
         Assert.assertTrue(out.getBytes().length > 10000);
@@ -118,6 +125,12 @@ public class LogStorageImplTest extends TestBase
         public String getKey() {
             return "Test case";
         }
+
+        @Override
+        public LogFilesDescriptor getLogDescriptor() {
+            return null;
+        }
+
     }
 
     /**
@@ -147,6 +160,31 @@ public class LogStorageImplTest extends TestBase
         @Override
         public ILogRetriever getRetriever() {
             return retriever;
+        }
+
+        @Override
+        public ILogProgress getProgress() {
+            return new ILogProgress() {
+                @Override
+                public void addTotalSize(long l) {
+
+                }
+
+                @Override
+                public void setTotalSize(long l) {
+
+                }
+
+                @Override
+                public void subtractSize(long l) {
+
+                }
+
+                @Override
+                public double getProgress() {
+                    return 0;
+                }
+            };
         }
     }
 
@@ -182,7 +220,7 @@ public class LogStorageImplTest extends TestBase
         }
 
         @Override
-        public boolean complete(ILogIdentifier identifier, List<File> files) {
+        public boolean complete(ILogIdentifier identifier) {
             return true;
         }
     }

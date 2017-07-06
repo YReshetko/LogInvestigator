@@ -38,8 +38,7 @@ public interface ILogSaver
     /**
      * Finish save (save info files)
      * @param identifier - log identifier
-     * @param files - log identifier
      * @return - true if saving was successfully
      */
-    boolean complete(ILogIdentifier identifier, List<File> files);
+    boolean complete(ILogIdentifier identifier);
 }

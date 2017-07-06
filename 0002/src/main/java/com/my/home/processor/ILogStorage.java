@@ -7,6 +7,7 @@ import com.my.home.storage.ILogStorageContext;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * Determines list of method which we can use for work with log nodes
@@ -18,7 +19,7 @@ public interface ILogStorage
      * @param identifier - identifier of log
      * @param files - list of log files
      */
-    void process(ILogIdentifier identifier, List<File> files);
+    Future<ILogIdentifier> process(ILogIdentifier identifier, List<File> files);
 
     /**
      * Retrieves iterator of log nodes for command
