@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -29,6 +30,11 @@ public class MainWindowController implements IUIController
     private VBox processors;
     @FXML
     private VBox postProcessors;
+    @FXML
+    private VBox pluginPanel;
+
+    @FXML
+    private BorderPane rootElement;
 
     @FXML
     private ProgressBar progress;
@@ -107,5 +113,18 @@ public class MainWindowController implements IUIController
     public ProgressBar getProgressBar()
     {
         return progress;
+    }
+
+    public TreeView getLogTreeView()
+    {
+        return logTree;
+    }
+    public VBox getPluginPanel()
+    {
+        return pluginPanel;
+    }
+    public BorderPane getRootElement()
+    {
+        return rootElement;
     }
 }

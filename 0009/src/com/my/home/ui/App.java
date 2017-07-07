@@ -1,6 +1,7 @@
 package com.my.home.ui;
 
 import com.my.home.log.LogIdentifierImpl;
+import com.my.home.log.beans.LogFilesDescriptor;
 import com.my.home.parser.ParserManager;
 import com.my.home.plugin.IPluginStorage;
 import com.my.home.plugin.PluginFactoryImpl;
@@ -9,6 +10,7 @@ import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
 import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
+import com.my.home.storage.mongo.commands.FindAllProcessedFilesCommand;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
@@ -17,10 +19,14 @@ import com.my.home.task.AfterParseLogTask;
 import com.my.home.task.executor.AppTaskExecutor;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.MainWindowController;
+import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.FileChooserUtil;
 import javafx.scene.Parent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -28,11 +34,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -80,6 +84,8 @@ public class App
     private PluginFactoryImpl pluginFactory;
 
     private AppTaskExecutor taskExecutor;
+
+    private LogTreeController treeController;
 
 
 
@@ -149,6 +155,11 @@ public class App
         storage.setStorageContext(context);
         pluginStorage = new MongoPluginStorage(connection);
         pluginFactory = new PluginFactoryImpl(pluginStorage, pluginDir);
+        //  INIT Tree view by all loaded files
+        Iterator<LogFilesDescriptor> files = storage.getIterator(null, new FindAllProcessedFilesCommand());
+        List<ILogIdentifier> descriptors = new LinkedList<>();
+        files.forEachRemaining(descriptor -> descriptors.add(new LogIdentifierImpl(descriptor)));
+        treeController.addAll(descriptors);
     }
     private void initPrimaryStage() throws Exception
     {
@@ -161,6 +172,10 @@ public class App
             isStageInitialized = true;
             WindowFactory.fillStage(this.primaryStage, windows.get("main"));
             primaryController = WindowFactory.getController(windows.get("main"));
+            MainWindowController castController = (MainWindowController) primaryController;
+            treeController = new LogTreeController(castController.getLogTreeView());
+            castController.getRootElement().setOnDragOver(this::handleDragEvent);
+            castController.getRootElement().setOnDragDropped(this::handleDropEvent);
             this.primaryStage.setMaximized(true);
             this.primaryStage.show();
             primaryStage.setOnCloseRequest(event -> {
@@ -199,23 +214,118 @@ public class App
         }
 
     }
+
+    /**
+     * Choose plugin from main menu
+     */
     public void choosePlugin()
     {
         File plugin = FileChooserUtil.getFile(getStageByName(null), "Plugins", "*.jar");
+        savePlugin(plugin);
+    }
+
+    /**
+     * Handle drag event for files on stage
+     * @param event - drag event
+     */
+    private void handleDragEvent(DragEvent event)
+    {
+        boolean canDrop = canHandleDragAndDropForFiles(event);
+        if (canDrop)
+        {
+            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+        }
+        event.consume();
+    }
+
+    /**
+     * Handle drop event for files
+     * @param event - event;
+     */
+    private void handleDropEvent(DragEvent event)
+    {
+        boolean canDrop = canHandleDragAndDropForFiles(event);
+        if (canDrop)
+        {
+            Dragboard dragboard = event.getDragboard();
+            List<File> files = dragboard.getFiles();
+            List<File> plugins = files.stream().filter(file ->
+                    file.getName().endsWith(".jar")).collect(Collectors.toList());
+            List<File> logs = files.stream().filter(file ->
+                    file.getName().endsWith(".log") ||
+                    file.getName().endsWith(".txt")).collect(Collectors.toList());
+            plugins.forEach(this::savePlugin);
+            saveLog(logs);
+        }
+        event.consume();
+    }
+
+    /**
+     * Check if this files can be dropped to program
+     * @param event - event
+     * @return - true if can drop
+     */
+    private boolean canHandleDragAndDropForFiles(DragEvent event)
+    {
+        Dragboard dragboard = event.getDragboard();
+        boolean canDrop = true;
+        if (dragboard.hasFiles())
+        {
+            List<File> files = dragboard.getFiles();
+            long unexpectedFilesCount = files.stream().filter(file ->
+                    !file.getName().endsWith(".log") &&
+                            !file.getName().endsWith(".txt") &&
+                            !file.getName().endsWith(".jar")).count();
+            if(unexpectedFilesCount > 0)
+            {
+                canDrop = false;
+            }
+        }
+        else
+        {
+            canDrop = false;
+        }
+        return canDrop;
+    }
+
+    /**
+     * Save file as plugin
+     * @param plugin - plugin
+     */
+    private void savePlugin(File plugin)
+    {
         pluginFactory.savePlugin(plugin);
         primaryController.update();
     }
+
+    /**
+     * Choose log from main menu
+     */
     public void chooseLog()
     {
         List<File> logFiles = FileChooserUtil.getFiles(getStageByName(null), "Log", "*.log", "*.txt");
         if(logFiles != null)
         {
-            ILogIdentifier identifier = new LogIdentifierImpl(logFiles, logFiles.get(0).getParentFile().getAbsolutePath());
-            Future<ILogIdentifier> future = storage.process(identifier, logFiles);
-            taskExecutor.addTask(new AfterParseLogTask(future));
+            saveLog(logFiles);
         }
     }
 
+    /**
+     * Save selected log
+     * @param files - log files
+     */
+    private void saveLog(List<File> files)
+    {
+        ILogIdentifier identifier = new LogIdentifierImpl(files, files.get(0).getParentFile().getAbsolutePath());
+        Future<ILogIdentifier> future = storage.process(identifier, files);
+        taskExecutor.addTask(new AfterParseLogTask(future, treeController));
+    }
+
+    /**
+     * Retrieve parent object to construct window or part of window
+     * @param doc - name of window
+     * @return - parent object for UI
+     */
     public Parent getNodeFromTemplate(String doc)
     {
         try
@@ -229,29 +339,55 @@ public class App
         }
     }
 
+    /**
+     * Setup windows map
+     * @param windows - new windows map
+     */
     public void setWindows(Map<String, WindowDescriptor> windows)
     {
         this.windows = windows;
     }
 
+    /**
+     * Setaup storage manager
+     * @param storageManager - storage manager
+     */
     public void setStorageManager(MongoStorageManager storageManager)
     {
         this.storageManager = storageManager;
     }
 
+    /**
+     * Setup parser manager
+     * @param parserManager - parser manager
+     */
     public void setParserManager(ParserManager parserManager)
     {
         this.parserManager = parserManager;
     }
+
+    /**
+     * Setup directory where will be copying plugins
+     * @param pluginDir
+     */
     public void setPluginDir(String pluginDir)
     {
         this.pluginDir = pluginDir;
     }
 
+    /**
+     * Retrieve mongo properties
+     * @return - mongo properties
+     */
     public Properties getStorageProps()
     {
         return this.storageManager.getProps();
     }
+
+    /**
+     * Setup new mongo properties
+     * @param newProps - new props
+     */
     public void setStorageProps(Properties newProps)
     {
         try {
@@ -265,6 +401,12 @@ public class App
         }
     }
 
+    /**
+     * Retrieve stage by it's name in cache. If it doesn't exist then return main stage
+     * Need this method to apply modal window
+     * @param name - name of stage which should be primary for modal window
+     * @return - Stage
+     */
     public Stage getStageByName(String name)
     {
         Stage currStage = modalWindows.get(name);
@@ -279,10 +421,19 @@ public class App
         return null;
     }
 
+    /**
+     * Retrieve parser manager
+     * @return - ParserManager
+     */
     public ParserManager getParserManager()
     {
         return parserManager;
     }
+
+    /**
+     * retrieve descriptions of all loaded plugins
+     * @return - list of plugins description
+     */
     public List<PluginToStore> getPlugins()
     {
         return pluginStorage.get();

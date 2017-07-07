@@ -6,12 +6,15 @@ import com.my.home.util.HashGenerator;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  *
  */
 public class LogIdentifierImpl implements ILogIdentifier
 {
+    private final static String DISC_PATTERN = "[a-zA-z]{1}:[\\\\/]{1,2}";
+    private final static Pattern PATTERN = Pattern.compile(DISC_PATTERN);
     private final LogFilesDescriptor descriptor;
     private final String id;
 
@@ -21,8 +24,10 @@ public class LogIdentifierImpl implements ILogIdentifier
         {
             throw new IllegalArgumentException("You have to select at least one log file");
         }
+        directory = directory.replaceFirst(PATTERN.pattern(), "");
         descriptor = new LogFilesDescriptor();
         descriptor.setDirectory(directory);
+        descriptor.setName(files.get(0).getName());
         files.forEach(file -> descriptor.getFiles().add(file.getAbsolutePath()));
         this.id = HashGenerator.hash(descriptor.getFiles());
         descriptor.setId(this.id);

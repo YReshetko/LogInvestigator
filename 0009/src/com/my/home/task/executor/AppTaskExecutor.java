@@ -77,7 +77,8 @@ public class AppTaskExecutor extends Thread
                 }
                 catch (InterruptedException e)
                 {
-                    e.printStackTrace();
+                    this.interrupt();
+                    //e.printStackTrace();
                 }
 
             }
