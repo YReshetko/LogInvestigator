@@ -7,7 +7,10 @@ import com.my.home.storage.ILogRetriever;
 import com.my.home.storage.mongo.IMongoLogAccess;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *

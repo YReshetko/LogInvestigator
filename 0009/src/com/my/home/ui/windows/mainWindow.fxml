@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.my.home.ui.controllers.MainWindowController">
+<BorderPane fx:id="rootElement" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.my.home.ui.controllers.MainWindowController">
    <left>
       <VBox maxWidth="300.0" minWidth="20.0" prefHeight="2000.0" BorderPane.alignment="CENTER">
          <children>
@@ -28,7 +28,7 @@
       <Pane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
    <right>
-      <VBox maxHeight="1.7976931348623157E308" maxWidth="300.0" BorderPane.alignment="CENTER">
+      <VBox fx:id="pluginPanel" maxHeight="1.7976931348623157E308" maxWidth="300.0" BorderPane.alignment="CENTER">
          <children>
             <TabPane minHeight="200.0" prefHeight="2000.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
