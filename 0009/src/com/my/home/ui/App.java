@@ -2,6 +2,10 @@ package com.my.home.ui;
 
 import com.my.home.log.LogIdentifierImpl;
 import com.my.home.log.beans.LogFilesDescriptor;
+import com.my.home.log.beans.ThreadsInfo;
+import com.my.home.log.manager.ILogManager;
+import com.my.home.log.manager.MainLogManager;
+import com.my.home.log.manager.web.WebLogManager;
 import com.my.home.parser.ParserManager;
 import com.my.home.plugin.IPluginStorage;
 import com.my.home.plugin.PluginFactoryImpl;
@@ -11,6 +15,7 @@ import com.my.home.processor.ILogStorage;
 import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
 import com.my.home.storage.mongo.commands.FindAllProcessedFilesCommand;
+import com.my.home.storage.mongo.commands.FindThreadsInfo;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
@@ -19,6 +24,7 @@ import com.my.home.task.AfterParseLogTask;
 import com.my.home.task.executor.AppTaskExecutor;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.MainWindowController;
+import com.my.home.ui.tree.ILogTreeListener;
 import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
@@ -27,8 +33,6 @@ import javafx.scene.Parent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -41,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  *
  */
-public class App
+public class App implements ILogTreeListener
 {
 
     private Map<String, WindowDescriptor> windows;
@@ -87,8 +91,12 @@ public class App
 
     private LogTreeController treeController;
 
+    private MainLogManager logManager;
 
-
+    /**
+     * Init application, runs once when application starts
+     * @param primaryStage - primary stage comes from JavaFX framework
+     */
     public void init(Stage primaryStage)
     {
         isStageInitialized = false;
@@ -106,6 +114,11 @@ public class App
         }
     }
 
+    /**
+     * Initialization of Mongo DB, its manager, stage and app context
+     * Should be executed when we change mongo connection (location, db etc.)
+     * @throws Exception - unexpected exception
+     */
     public void initApplicationContext() throws Exception
     {
         if (storageManager.needAutoRunDB())
@@ -118,6 +131,12 @@ public class App
         primaryController.update();
     }
 
+    /**
+     * Initialization of main part of program:
+     * - storage
+     * - plugin storage and factory
+     * - // TODO processors
+     */
     private void initNewContext()
     {
         final ILogSaver saver = new MongoLogSaver(connection);
@@ -161,6 +180,12 @@ public class App
         files.forEachRemaining(descriptor -> descriptors.add(new LogIdentifierImpl(descriptor)));
         treeController.addAll(descriptors);
     }
+
+    /**
+     * Initialization of main stage of the application must be done only once
+     * If the method runs again it should clean all dynamics elements on stage
+     * @throws Exception - unexpected exception
+     */
     private void initPrimaryStage() throws Exception
     {
         if(!isStageInitialized)
@@ -170,12 +195,20 @@ public class App
                 modalWindows.get("storageOption").close();
             }
             isStageInitialized = true;
+            //  Init primary stage
             WindowFactory.fillStage(this.primaryStage, windows.get("main"));
+            // Init UI controller for primary stage
             primaryController = WindowFactory.getController(windows.get("main"));
             MainWindowController castController = (MainWindowController) primaryController;
+            //  Init Controller of log tree
             treeController = new LogTreeController(castController.getLogTreeView());
+            treeController.setTreeListener(this);
+            //Init log manager
+            initLogManager(castController);
+            //  Init listeners for drag and drop files to application (plugins, log)
             castController.getRootElement().setOnDragOver(this::handleDragEvent);
             castController.getRootElement().setOnDragDropped(this::handleDropEvent);
+            //  Setup primary stage
             this.primaryStage.setMaximized(true);
             this.primaryStage.show();
             primaryStage.setOnCloseRequest(event -> {
@@ -191,6 +224,21 @@ public class App
         }
     }
 
+    /**
+     * Initialization of log manager, which contains different viewports of log
+     * @param mainController - main controller to retrieve UI elements
+     */
+    private void initLogManager(MainWindowController mainController)
+    {
+        logManager = new MainLogManager();
+        ILogManager webLogManager = new WebLogManager(mainController.getWebLog());
+        logManager.addLogManger(webLogManager);
+    }
+
+    /**
+     * Show modal window by its name
+     * @param modal - name of modal window (setup in spring)
+     */
     public void openModal(String modal)
     {
         try {
@@ -437,5 +485,27 @@ public class App
     public List<PluginToStore> getPlugins()
     {
         return pluginStorage.get();
+    }
+
+    /**
+     * Implement listen method of selected tree
+     * @param identifier - log identifier
+     */
+    @Override
+    public void dispatch(ILogIdentifier identifier) {
+        if (identifier != null)
+        {
+            Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfo());
+            ThreadsInfo selectedLog = null;
+
+            while (threadsInfoIterator.hasNext())
+            {
+                selectedLog = threadsInfoIterator.next();
+            }
+            if(selectedLog != null)
+            {
+                logManager.setThreadsInfo(selectedLog);
+            }
+        }
     }
 }

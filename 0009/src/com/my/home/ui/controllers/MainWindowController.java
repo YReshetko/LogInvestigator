@@ -12,6 +12,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 
 import java.util.ArrayList;
@@ -35,6 +36,9 @@ public class MainWindowController implements IUIController
 
     @FXML
     private BorderPane rootElement;
+
+    @FXML
+    private WebView webLog;
 
     @FXML
     private ProgressBar progress;
@@ -126,5 +130,10 @@ public class MainWindowController implements IUIController
     public BorderPane getRootElement()
     {
         return rootElement;
+    }
+
+    public WebView getWebLog()
+    {
+        return webLog;
     }
 }

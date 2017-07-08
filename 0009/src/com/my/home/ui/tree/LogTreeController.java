@@ -13,32 +13,39 @@ import java.util.regex.Pattern;
 /**
  *
  */
-public class LogTreeController implements ILogTreeListener
+public class LogTreeController
 {
     private final static String FOLDER_SPLITTER = "[\\\\|/]{1,2}";
     private final static Pattern PATTERN = Pattern.compile(FOLDER_SPLITTER);
 
     private static final String LABEL = "Parsed log";
-    private final TreeView view;
+    //private final TreeView view;
     private final LogTreeRoot root;
+    private ILogTreeListener listener;
     public LogTreeController(TreeView view)
     {
-        this.view = view;
+        //this.view = view;
         root = new LogTreeRoot(LABEL);
         view.setRoot(root.getItem());
         view.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<ILogTreeElement>>() {
             @Override
-            public void changed(ObservableValue<? extends TreeItem<ILogTreeElement>> observable, TreeItem<ILogTreeElement> oldValue, TreeItem<ILogTreeElement> newValue) {
+            public void changed(ObservableValue<? extends TreeItem<ILogTreeElement>> observable,
+                                TreeItem<ILogTreeElement> oldValue,
+                                TreeItem<ILogTreeElement> newValue) {
                 ILogTreeElement selectedItem = newValue.getValue();
                 selectedItem.select();
             }
         });
     }
+    public void setTreeListener(ILogTreeListener listener)
+    {
+        this.listener = listener;
+    }
 
     public void add(ILogIdentifier identifier)
     {
         LogTreeLeaf leaf = new LogTreeLeaf(identifier);
-        leaf.addEventListener(this);
+        leaf.addEventListener(listener);
         String path = identifier.getLogDescriptor().getDirectory();
         Deque<String> deque = new LinkedList<>();
         deque.addAll(Arrays.asList(path.split(PATTERN.pattern())));
@@ -47,15 +54,5 @@ public class LogTreeController implements ILogTreeListener
     public void addAll(List<ILogIdentifier> identifiers)
     {
         identifiers.forEach(this::add);
-    }
-
-    @Override
-    public void dispatch(ILogIdentifier identifier) {
-        if (identifier != null)
-        {
-            //  TODO dispatch event;
-            System.out.println("Dispatch event from node with:");
-            System.out.println(JsonUtils.getJson(identifier.getLogDescriptor()));
-        }
     }
 }
