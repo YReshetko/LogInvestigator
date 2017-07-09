@@ -15,8 +15,11 @@ import java.util.Iterator;
 public class MongoLogAccess<V> implements IMongoLogAccess<V>
 {
 
+    private final static String SORT_TEMPLATE = "{\"id\" : 1}";
     private DBCollection collection;
+    private DBObject sort;
     private Class aClass;
+    private String sortBy;
     public MongoLogAccess(DBCollection collection, Class aClass)
     {
         this.collection = collection;
@@ -25,13 +28,33 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
 
     @Override
     public <V> Iterator<V> findAll() {
-        return new LogIterator(collection.find(), aClass);
+        DBCursor cursor = null;
+        sort = getSorter();
+        if(sort == null)
+        {
+            cursor = collection.find();
+        }
+        else
+        {
+            cursor = collection.find().sort(sort);
+        }
+        return new LogIterator(cursor, aClass);
     }
 
     @Override
     public <V> Iterator<V> find(String searchKey)
     {
-        return new LogIterator(collection.find((DBObject) JSON.parse(searchKey)), aClass);
+        DBCursor cursor = null;
+        sort = getSorter();
+        if(sort == null)
+        {
+            cursor = collection.find((DBObject) JSON.parse(searchKey));
+        }
+        else
+        {
+            cursor = collection.find((DBObject) JSON.parse(searchKey)).sort(sort);
+        }
+        return new LogIterator(cursor, aClass);
     }
 
     @Override
@@ -54,6 +77,23 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
     @Override
     public void remove(String value) {
 
+    }
+
+    @Override
+    public void setSortBy(String field) {
+        sortBy = field;
+    }
+
+    private DBObject getSorter()
+    {
+        if (sortBy != null)
+        {
+            return (DBObject) JSON.parse(String.format(SORT_TEMPLATE, sortBy));
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private class LogIterator<V> implements Iterator<V>

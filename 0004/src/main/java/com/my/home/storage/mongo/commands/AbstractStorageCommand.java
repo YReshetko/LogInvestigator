@@ -59,6 +59,11 @@ public abstract class AbstractStorageCommand<V> implements ILogStorageCommand<V>
         return identifier;
     }
 
+    @Override
+    public String sortBy() {
+        return null;
+    }
+
     protected String split(List<String> buff)
     {
         StringBuilder builder = new StringBuilder();

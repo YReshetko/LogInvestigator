@@ -22,6 +22,19 @@ public class FileChooserUtil
         }
         return out;
     }
+
+    public static File saveFile(Stage parent, String label, String initFileName, String... extensions)
+    {
+        FileChooser chooser = getChooser(label, extensions);
+        chooser.setInitialFileName(initFileName);
+        File out = chooser.showSaveDialog(parent);
+        if(out != null)
+        {
+            initialDir = out.getParentFile();
+        }
+        return out;
+    }
+
     public static List<File> getFiles(Stage parent, String label, String... extensions)
     {
         List<File> out = getChooser(label, extensions).showOpenMultipleDialog(parent);

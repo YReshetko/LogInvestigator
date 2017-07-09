@@ -2,6 +2,7 @@ package com.my.home.log.manager.web;
 
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.log.manager.ILogManager;
+import com.my.home.storage.ILogIdentifier;
 import com.my.home.util.JsonUtils;
 import javafx.event.EventHandler;
 import javafx.scene.web.WebEngine;
@@ -12,6 +13,8 @@ import netscape.javascript.JSObject;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,6 +24,8 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
 {
     private final WebView webView;
     private final WebEngine webEngine;
+    private List<String> selectedThreads;
+
     public WebLogManager(WebView webView)
     {
         this.webView = webView;
@@ -38,10 +43,8 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
             jsObject.setMember("app", this);
             //webEngine.executeScript("init()");
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
-        //webEngine.load("http://www.tut.by");
     }
 
     @Override
@@ -60,10 +63,30 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
         System.out.println("Returned value from JS: " + value);
     }
 
+    /**
+     * This method will be called from JavaScript to fill list of selected threads
+     * @param threadName - thread name to add
+     */
     @Override
-    public List<String> getSelectedThreads() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public void addSelectedThread(String threadName) {
+        if(selectedThreads!=null)
+        {
+            selectedThreads.add(threadName);
+        }
     }
 
-
+    /**
+     * After execution of this JS method, it will call back:
+     * @see {@link com.my.home.log.manager.web.WebLogManager#addSelectedThread}
+     * To fill new List with selected thread names
+     * @return - list of selected thread names
+     */
+    @Override
+    public List<String> getSelectedThreads()
+    {
+        selectedThreads = new ArrayList<>();
+        //  After execution of this JS method, it will call back java method
+        webEngine.executeScript("getSelectedThreads()");
+        return selectedThreads;
+    }
 }

@@ -2,6 +2,7 @@ package com.my.home.ui;
 
 import com.my.home.log.LogIdentifierImpl;
 import com.my.home.log.beans.LogFilesDescriptor;
+import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.log.manager.ILogManager;
 import com.my.home.log.manager.MainLogManager;
@@ -12,9 +13,11 @@ import com.my.home.plugin.PluginFactoryImpl;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
+import com.my.home.processor.ILogStorageCommand;
 import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
 import com.my.home.storage.mongo.commands.FindAllProcessedFilesCommand;
+import com.my.home.storage.mongo.commands.FindNodesCommand;
 import com.my.home.storage.mongo.commands.FindThreadsInfo;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
@@ -29,6 +32,8 @@ import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.FileChooserUtil;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -37,6 +42,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -233,6 +239,10 @@ public class App implements ILogTreeListener
         logManager = new MainLogManager();
         ILogManager webLogManager = new WebLogManager(mainController.getWebLog());
         logManager.addLogManger(webLogManager);
+
+        //  Init button handlers
+        mainController.getLogProcessBtn().setOnAction(this::handleProcessSelectedLog);
+        mainController.getLogDownloadBtn().setOnAction(this::handleDownloadSelectedLog);
     }
 
     /**
@@ -504,8 +514,69 @@ public class App implements ILogTreeListener
             }
             if(selectedLog != null)
             {
+                logManager.setIdentifier(identifier);
                 logManager.setThreadsInfo(selectedLog);
             }
+            else
+            {
+                logManager.setIdentifier(null);
+            }
+        }
+    }
+
+    private void handleProcessSelectedLog(ActionEvent event)
+    {
+        ILogIdentifier identifier = logManager.getIdentifier();
+        List<String> logThreads = logManager.getSelectedThreads();
+        System.out.println("Prepare selector for processing:");
+        logThreads.forEach(System.out::println);
+    }
+    private void handleDownloadSelectedLog(ActionEvent event)
+    {
+        ILogIdentifier identifier = logManager.getIdentifier();
+        List<String> logThreads = logManager.getSelectedThreads();
+        if(logThreads.size() > 0)
+        {
+            List<LogNode> nodes = new ArrayList<>(logThreads.size());
+            logThreads.forEach(thread -> {
+                LogNode node = new LogNode();
+                node.setThread(thread);
+                nodes.add(node);
+            });
+            ILogStorageCommand command = new FindNodesCommand();
+            command.setData(identifier, nodes.toArray());
+            String fileTestToSave = storage.getLog(identifier, command);
+            /*System.out.println("Prepare selector for downloading:");
+            logThreads.forEach(System.out::println);*/
+            //System.out.println(fileTestToSave);
+            File file = FileChooserUtil.saveFile(getStageByName(null), "Save file", logThreads.get(0) + ".log", "*.log");
+            FileWriter writer = null;
+            try
+            {
+                writer = new FileWriter(file);
+                writer.write(fileTestToSave);
+                writer.flush();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            finally
+            {
+                if(writer != null)
+                {
+                    try
+                    {
+                        writer.close();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                }
+
+            }
+
         }
     }
 }

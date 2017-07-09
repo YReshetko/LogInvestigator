@@ -12,5 +12,6 @@ public interface ILogStorageCommand<V>
     void setData(ILogIdentifier identifier);
     ILogIdentifier getIdentifier();
     String getCommand();
+    String sortBy();
 
 }

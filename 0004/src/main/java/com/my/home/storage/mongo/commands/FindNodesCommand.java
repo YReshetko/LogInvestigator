@@ -31,6 +31,8 @@ public class FindNodesCommand extends AbstractStorageCommand<LogNode>
         return builder.toString();
     }
 
+
+
     protected List<String> getListCommand(List<LogNode> value)
     {
         List<String> out = new ArrayList<>();
@@ -80,5 +82,10 @@ public class FindNodesCommand extends AbstractStorageCommand<LogNode>
             }
         }
         return out;
+    }
+
+    @Override
+    public String sortBy() {
+        return "id";
     }
 }
