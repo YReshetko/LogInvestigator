@@ -278,5 +278,10 @@ public class LogStorageImplTest extends TestBase
         public String getCommand() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
+
+        @Override
+        public String sortBy() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
     }
 }

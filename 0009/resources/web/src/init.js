@@ -18,6 +18,15 @@ function setThreads(threads)
 
 function getSelectedThreads()
 {
-	return view._getSelectedThreads();
+	var selectedThreads = view.getSelectedThreads();
+	if(app != null)
+	{
+		var i;
+		for (i = 0; i< selectedThreads.length; i++)
+		{
+			//  Call back to java application to set new thread
+		  	app.addSelectedThread(selectedThreads[i]);
+		}
+	}
 }
 

@@ -29,6 +29,7 @@ public class MongoLogRetriever extends MongoLogBase implements ILogRetriever
         IMongoLogAccess<V> access = getAccess(identifier, getCollection(vClass));
         String command = iLogStorageCommand.getCommand();
         Iterator<V> out = null;
+        access.setSortBy(iLogStorageCommand.sortBy());
         if(command == null)
         {
             out = access.findAll();

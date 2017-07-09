@@ -6,4 +6,5 @@ package com.my.home.log.manager.web;
 public interface IWebJsLogManager
 {
     void download(String value);
+    void addSelectedThread(String threadName);
 }

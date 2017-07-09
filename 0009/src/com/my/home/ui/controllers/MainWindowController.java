@@ -8,6 +8,7 @@ import com.my.home.ui.plugin.PluginSample;
 import com.my.home.ui.windows.WindowFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
@@ -43,6 +44,12 @@ public class MainWindowController implements IUIController
     @FXML
     private ProgressBar progress;
 
+    @FXML
+    private Button logProcessBtn;
+    @FXML
+    private Button logDownloadBtn;
+    @FXML
+    private Button logRemoveBtn;
     @FXML
     private TreeView logTree;
     private App mainApp;
@@ -135,5 +142,17 @@ public class MainWindowController implements IUIController
     public WebView getWebLog()
     {
         return webLog;
+    }
+
+    public Button getLogProcessBtn() {
+        return logProcessBtn;
+    }
+
+    public Button getLogDownloadBtn() {
+        return logDownloadBtn;
+    }
+
+    public Button getLogRemoveBtn() {
+        return logRemoveBtn;
     }
 }

@@ -19,7 +19,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
 
-
 <BorderPane fx:id="rootElement" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.my.home.ui.controllers.MainWindowController">
    <left>
       <VBox maxWidth="300.0" minWidth="20.0" prefHeight="2000.0" BorderPane.alignment="CENTER">
@@ -160,9 +159,9 @@
                                  <children>
                                     <HBox AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                        <children>
-                                          <Button mnemonicParsing="false" text="Process" />
-                                          <Button mnemonicParsing="false" text="Download" />
-                                          <Button mnemonicParsing="false" text="Remove">
+                                          <Button fx:id="logProcessBtn" mnemonicParsing="false" text="Process" />
+                                          <Button fx:id="logDownloadBtn" mnemonicParsing="false" text="Download" />
+                                          <Button fx:id="logRemoveBtn" mnemonicParsing="false" text="Remove">
                                              <HBox.margin>
                                                 <Insets left="50.0" />
                                              </HBox.margin>

@@ -17,4 +17,5 @@ public interface IMongoLogAccess<V>
 
     void removeAll();
     void remove(String value);
+    void setSortBy(String field);
 }
