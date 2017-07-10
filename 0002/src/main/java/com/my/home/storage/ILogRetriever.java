@@ -12,5 +12,5 @@ import java.util.List;
 public interface ILogRetriever
 {
     <V> Iterator<V> get(ILogIdentifier identifier, ILogStorageCommand<V> command);
-    void changeLog(ILogIdentifier identifier, ILogStorageCommand command);
+    <V> void changeLog(ILogIdentifier identifier, ILogStorageCommand<V> command);
 }

@@ -7,11 +7,20 @@ import com.my.home.storage.ILogIdentifier;
  */
 public interface ILogStorageCommand<V>
 {
+    enum Command
+    {
+        FIND, FIND_ALL, UPDATE, REMOVE, REMOVE_ALL;
+    }
     void setData(V... value);
     void setData(ILogIdentifier identifier, V... value);
     void setData(ILogIdentifier identifier);
     ILogIdentifier getIdentifier();
-    String getCommand();
     String sortBy();
+    Class<V> getType();
+    Command getCommandType();
+    String getSelector();
+    String getOldValue();
+    String getNewValue();
+
 
 }

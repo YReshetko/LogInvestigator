@@ -1,6 +1,7 @@
 package com.my.home.storage.mongo.commands;
 
 import com.my.home.log.beans.LogNode;
+import com.my.home.processor.ILogStorageCommand;
 import com.my.home.storage.mongo.util.BeanFactory;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,8 +64,18 @@ public class AbstractStorageCommandTest
     private class AbstractStorageCommandTestImpl<V> extends AbstractStorageCommand<V>
     {
         @Override
-        public String getCommand() {
+        public String getSelector() {
             throw new UnsupportedOperationException("This method is out of testing");
+        }
+
+        @Override
+        public Class<V> getType() {
+            return null;
+        }
+
+        @Override
+        public Command getCommandType() {
+            return null;
         }
     }
 }

@@ -61,9 +61,10 @@ public class MongoLogBase
             collectionMap.put(logCollection.aClass, logCollection);
         }
     }
-    protected IMongoLogAccess getAccess(ILogIdentifier identifier, LogCollection collection)
+    protected <V> IMongoLogAccess<V> getAccess(ILogIdentifier identifier, LogCollection collection)
     {
-        return connection.getAccess(collection.getCollectionName(identifier), collection.aClass);
+        Class<V> vClass = collection.aClass;
+        return connection.getAccess(collection.getCollectionName(identifier), vClass);
     }
     protected <V> LogCollection getCollection(Class<V> vClass)
     {

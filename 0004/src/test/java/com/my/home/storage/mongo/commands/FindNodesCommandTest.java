@@ -23,7 +23,7 @@ public class FindNodesCommandTest
     {
         LogNode node = BeanFactory.getLogNode();
         m_toTest.setData(node);
-        String request = m_toTest.getCommand();
+        String request = m_toTest.getSelector();
         Assert.assertTrue(request.contains(node.getClassPackage()));
         Assert.assertTrue(request.contains(node.getDate()));
         Assert.assertTrue(request.contains(node.getLogLevel()));

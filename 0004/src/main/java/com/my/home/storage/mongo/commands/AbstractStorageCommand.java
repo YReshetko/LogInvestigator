@@ -64,6 +64,21 @@ public abstract class AbstractStorageCommand<V> implements ILogStorageCommand<V>
         return null;
     }
 
+    @Override
+    public String getSelector() {
+        return null;
+    }
+
+    @Override
+    public String getOldValue() {
+        return null;
+    }
+
+    @Override
+    public String getNewValue() {
+        return null;
+    }
+
     protected String split(List<String> buff)
     {
         StringBuilder builder = new StringBuilder();

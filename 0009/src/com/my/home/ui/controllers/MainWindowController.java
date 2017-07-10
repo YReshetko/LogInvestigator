@@ -51,6 +51,8 @@ public class MainWindowController implements IUIController
     @FXML
     private Button logRemoveBtn;
     @FXML
+    private Button logRestoreBtn;
+    @FXML
     private TreeView logTree;
     private App mainApp;
     private Map<PluginType, List<PluginSample>> allPlugins;
@@ -154,5 +156,8 @@ public class MainWindowController implements IUIController
 
     public Button getLogRemoveBtn() {
         return logRemoveBtn;
+    }
+    public Button getLogRestoreBtn() {
+        return logRestoreBtn;
     }
 }

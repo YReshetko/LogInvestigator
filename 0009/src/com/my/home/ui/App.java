@@ -16,9 +16,7 @@ import com.my.home.processor.ILogStorage;
 import com.my.home.processor.ILogStorageCommand;
 import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
-import com.my.home.storage.mongo.commands.FindAllProcessedFilesCommand;
-import com.my.home.storage.mongo.commands.FindNodesCommand;
-import com.my.home.storage.mongo.commands.FindThreadsInfo;
+import com.my.home.storage.mongo.commands.*;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
@@ -33,7 +31,6 @@ import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.FileChooserUtil;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -41,10 +38,12 @@ import javafx.scene.input.TransferMode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -149,6 +148,7 @@ public class App implements ILogTreeListener
         final ILogRetriever retriever = new MongoLogRetriever(connection);
         final ILogNodeParser parser = parserManager.getParser("default");
         final ILogProgress progress = new ProgressManager(((MainWindowController) primaryController).getProgressBar());
+        taskExecutor.setProgressManager(progress);
         ILogStorageContext context = new ILogStorageContext()
         {
 
@@ -243,6 +243,8 @@ public class App implements ILogTreeListener
         //  Init button handlers
         mainController.getLogProcessBtn().setOnAction(this::handleProcessSelectedLog);
         mainController.getLogDownloadBtn().setOnAction(this::handleDownloadSelectedLog);
+        mainController.getLogRemoveBtn().setOnAction(this::handleDeleteSelectedLog);
+        mainController.getLogRestoreBtn().setOnAction(this::handleRestoreSelectedLog);
     }
 
     /**
@@ -279,7 +281,10 @@ public class App implements ILogTreeListener
     public void choosePlugin()
     {
         File plugin = FileChooserUtil.getFile(getStageByName(null), "Plugins", "*.jar");
-        savePlugin(plugin);
+        if(plugin != null)
+        {
+            savePlugin(plugin);
+        }
     }
 
     /**
@@ -505,7 +510,7 @@ public class App implements ILogTreeListener
     public void dispatch(ILogIdentifier identifier) {
         if (identifier != null)
         {
-            Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfo());
+            Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());
             ThreadsInfo selectedLog = null;
 
             while (threadsInfoIterator.hasNext())
@@ -528,13 +533,87 @@ public class App implements ILogTreeListener
     {
         ILogIdentifier identifier = logManager.getIdentifier();
         List<String> logThreads = logManager.getSelectedThreads();
-        System.out.println("Prepare selector for processing:");
-        logThreads.forEach(System.out::println);
+        if (logThreads.size() > 0)
+        {
+            System.out.println("Prepare selector for processing:");
+            logThreads.forEach(System.out::println);
+
+            //  TODO Implement pass selected threads into plugin processing
+        }
+
+    }
+
+    private void handleDeleteSelectedLog(ActionEvent event)
+    {
+        ILogIdentifier identifier = logManager.getIdentifier();
+        List<String> logThreads = logManager.getSelectedThreads();
+        if (logThreads.size() > 0)
+        {
+            System.out.println("Prepare selector for processing:");
+            logThreads.forEach(System.out::println);
+
+            Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());
+            ThreadsInfo selectedLog = null;
+
+            while (threadsInfoIterator.hasNext())
+            {
+                selectedLog = threadsInfoIterator.next();
+            }
+            if(selectedLog != null)
+            {
+                if (storage.changeLog(identifier, new RemoveThreadsCommand(selectedLog, logThreads)))
+                {
+                    dispatch(identifier);
+                }
+            }
+        }
+
+    }
+    private void handleRestoreSelectedLog(ActionEvent event)
+    {
+        ILogIdentifier identifier = logManager.getIdentifier();
+
+        Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());
+        ThreadsInfo selectedLog = null;
+
+        while (threadsInfoIterator.hasNext())
+        {
+            selectedLog = threadsInfoIterator.next();
+        }
+        if(selectedLog != null)
+        {
+            if (storage.changeLog(identifier, new RestoreAllThreadsCommand(selectedLog)))
+            {
+                dispatch(identifier);
+            }
+        }
+
     }
     private void handleDownloadSelectedLog(ActionEvent event)
     {
         ILogIdentifier identifier = logManager.getIdentifier();
         List<String> logThreads = logManager.getSelectedThreads();
+        downloadThreads(identifier, logThreads);
+    }
+    public void downloadThreadAndOpen(String threadName)
+    {
+        ILogIdentifier identifier = logManager.getIdentifier();
+        List<String> logThreads = Arrays.asList(threadName);
+        File fileToOpen = downloadThreads(identifier, logThreads);
+        if (fileToOpen != null)
+        {
+            try
+            {
+                Desktop.getDesktop().open(fileToOpen);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    public File downloadThreads(ILogIdentifier identifier, List<String> logThreads)
+    {
         if(logThreads.size() > 0)
         {
             List<LogNode> nodes = new ArrayList<>(logThreads.size());
@@ -546,20 +625,21 @@ public class App implements ILogTreeListener
             ILogStorageCommand command = new FindNodesCommand();
             command.setData(identifier, nodes.toArray());
             String fileTestToSave = storage.getLog(identifier, command);
-            /*System.out.println("Prepare selector for downloading:");
-            logThreads.forEach(System.out::println);*/
-            //System.out.println(fileTestToSave);
             File file = FileChooserUtil.saveFile(getStageByName(null), "Save file", logThreads.get(0) + ".log", "*.log");
             FileWriter writer = null;
             try
             {
-                writer = new FileWriter(file);
-                writer.write(fileTestToSave);
-                writer.flush();
+                if(file != null)
+                {
+                    writer = new FileWriter(file);
+                    writer.write(fileTestToSave);
+                    writer.flush();
+                }
             }
             catch (IOException e)
             {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                file = null;
+                e.printStackTrace();
             }
             finally
             {
@@ -571,12 +651,14 @@ public class App implements ILogTreeListener
                     }
                     catch (IOException e)
                     {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        file = null;
+                        e.printStackTrace();
                     }
                 }
-
+                return file;
             }
 
         }
+        return null;
     }
 }
