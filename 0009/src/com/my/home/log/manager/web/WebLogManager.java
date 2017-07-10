@@ -1,8 +1,10 @@
 package com.my.home.log.manager.web;
 
+import com.my.home.factory.SpringBeanFactory;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.log.manager.ILogManager;
 import com.my.home.storage.ILogIdentifier;
+import com.my.home.ui.App;
 import com.my.home.util.JsonUtils;
 import javafx.event.EventHandler;
 import javafx.scene.web.WebEngine;
@@ -25,7 +27,7 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
     private final WebView webView;
     private final WebEngine webEngine;
     private List<String> selectedThreads;
-
+    private App app;
     public WebLogManager(WebView webView)
     {
         this.webView = webView;
@@ -45,6 +47,7 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
         } catch (Exception e) {
             e.printStackTrace();
         }
+        app = (App) SpringBeanFactory.getInstance().getBean("Application");
     }
 
     @Override
@@ -61,6 +64,7 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
     @Override
     public void download(String value) {
         System.out.println("Returned value from JS: " + value);
+        app.downloadThreadAndOpen(value);
     }
 
     /**

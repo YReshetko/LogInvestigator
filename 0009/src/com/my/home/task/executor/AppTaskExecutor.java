@@ -1,5 +1,7 @@
 package com.my.home.task.executor;
 
+import com.my.home.processor.ILogProgress;
+import com.my.home.progress.ProgressManager;
 import com.my.home.task.IAppTask;
 
 import java.util.LinkedList;
@@ -20,6 +22,9 @@ public class AppTaskExecutor extends Thread
     private final Lock writeLock;
     private boolean isWait;
     private final Object monitor;
+    private ILogProgress progressManager;
+
+
     public AppTaskExecutor()
     {
         tasks = new LinkedList<>();
@@ -69,6 +74,10 @@ public class AppTaskExecutor extends Thread
                 {
                     synchronized (monitor)
                     {
+                        if(progressManager != null)
+                        {
+                            progressManager.setTotalSize(0);
+                        }
                         monitor.wait();
                     }
                     isWait = false;
@@ -106,5 +115,10 @@ public class AppTaskExecutor extends Thread
             }
         }
     }
+
+    public void setProgressManager(ILogProgress progressManager) {
+        this.progressManager = progressManager;
+    }
+
 
 }

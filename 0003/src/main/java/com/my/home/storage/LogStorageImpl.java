@@ -66,8 +66,10 @@ public class LogStorageImpl implements ILogStorage
     }
 
     @Override
-    public boolean changeLog(ILogIdentifier identifier, ILogStorageCommand command) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public boolean changeLog(ILogIdentifier identifier, ILogStorageCommand command)
+    {
+        retriever.changeLog(identifier, command);
+        return true;
     }
 
 

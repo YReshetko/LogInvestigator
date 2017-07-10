@@ -24,25 +24,43 @@ public class MongoLogRetriever extends MongoLogBase implements ILogRetriever
     @Override
     public <V> Iterator<V> get(ILogIdentifier identifier, ILogStorageCommand<V> iLogStorageCommand)
     {
-        Class<V> vClass = (Class<V>) ((ParameterizedType) iLogStorageCommand.getClass()
-                .getGenericSuperclass()).getActualTypeArguments()[0];
+        Class<V> vClass = iLogStorageCommand.getType();
         IMongoLogAccess<V> access = getAccess(identifier, getCollection(vClass));
-        String command = iLogStorageCommand.getCommand();
         Iterator<V> out = null;
         access.setSortBy(iLogStorageCommand.sortBy());
-        if(command == null)
+        if(iLogStorageCommand.getCommandType() == ILogStorageCommand.Command.FIND_ALL)
         {
             out = access.findAll();
         }
         else
         {
+            String command = iLogStorageCommand.getSelector();
             out = access.find(command);
         }
         return out;
     }
 
     @Override
-    public void changeLog(ILogIdentifier identifier, ILogStorageCommand iLogStorageCommand) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public <V> void changeLog(ILogIdentifier identifier, ILogStorageCommand<V> iLogStorageCommand) {
+        Class<V> vClass = iLogStorageCommand.getType();
+        IMongoLogAccess<V> access = getAccess(identifier, getCollection(vClass));
+        ILogStorageCommand.Command command = iLogStorageCommand.getCommandType();
+        if(command == ILogStorageCommand.Command.UPDATE)
+        {
+            access.update(iLogStorageCommand.getOldValue(), iLogStorageCommand.getNewValue());
+        }
+        else if (command == ILogStorageCommand.Command.REMOVE)
+        {
+            access.remove(iLogStorageCommand.getSelector());
+        }
+        else if(command == ILogStorageCommand.Command.REMOVE_ALL)
+        {
+            access.removeAll();
+        }
+        else
+        {
+            throw new IllegalArgumentException("Wrong type of command to make change into storage: " + command);
+        }
+
     }
 }

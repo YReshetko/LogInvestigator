@@ -64,7 +64,8 @@ public class FileChooserUtil
     private static FileChooser getChooser(String label, String... extensions)
     {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(label, extensions));
+        //fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(label, extensions));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(label, extensions));
         if(initialDir != null)
         {
             fileChooser.setInitialDirectory(initialDir);

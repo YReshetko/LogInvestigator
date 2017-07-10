@@ -18,9 +18,9 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
     private final static String SORT_TEMPLATE = "{\"id\" : 1}";
     private DBCollection collection;
     private DBObject sort;
-    private Class aClass;
+    private Class<V> aClass;
     private String sortBy;
-    public MongoLogAccess(DBCollection collection, Class aClass)
+    public MongoLogAccess(DBCollection collection, Class<V> aClass)
     {
         this.collection = collection;
         this.aClass = aClass;
@@ -66,7 +66,9 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
 
     @Override
     public void update(String oldValue, String newValue) {
-
+        DBObject toUpdate = (DBObject) JSON.parse(oldValue);
+        DBObject value = (DBObject) JSON.parse(newValue);
+        collection.update(toUpdate, value);
     }
 
     @Override

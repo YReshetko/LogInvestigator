@@ -1,6 +1,7 @@
 package com.my.home.storage.mongo.commands;
 
 import com.my.home.log.beans.LogNode;
+import com.my.home.processor.ILogStorageCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class FindNodesCommand extends AbstractStorageCommand<LogNode>
     private static final String LONG_DATE_TIME_TEMP = "\"longDateTime\":%s";
 
     @Override
-    public String getCommand()
+    public String getSelector()
     {
         List<String> cases = getListCommand(value);
         StringBuilder builder = new StringBuilder();
@@ -87,5 +88,15 @@ public class FindNodesCommand extends AbstractStorageCommand<LogNode>
     @Override
     public String sortBy() {
         return "id";
+    }
+
+    @Override
+    public Class<LogNode> getType() {
+        return LogNode.class;
+    }
+
+    @Override
+    public Command getCommandType() {
+        return Command.FIND;
     }
 }

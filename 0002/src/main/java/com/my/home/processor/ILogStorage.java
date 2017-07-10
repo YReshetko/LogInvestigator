@@ -35,6 +35,7 @@ public interface ILogStorage
      * @param command
      * @return
      */
+    //  TODO make return value as OutputStream or similar in NIO
     String getLog(ILogIdentifier identifier, ILogStorageCommand<LogNode> command);
 
     /**
