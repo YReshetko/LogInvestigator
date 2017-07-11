@@ -61,6 +61,8 @@
         <module>0004</module>
         <!--Factory of plugins-->
         <module>0005</module>
+        <!--UI Application-->
+        <module>0009</module>
 
 
     </modules>
