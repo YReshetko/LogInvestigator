@@ -31,5 +31,9 @@ public class PluginSample
     {
         return controller.isSelected();
     }
+    public PluginToStore getPluginDescriptor()
+    {
+        return pluginDescriptor;
+    }
 
 }
