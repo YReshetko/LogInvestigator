@@ -537,8 +537,21 @@ public class App implements ILogTreeListener
     {
         ILogIdentifier identifier = logManager.getIdentifier();
         List<String> logThreads = logManager.getSelectedThreads();
-
-        if (logThreads.size() > 0)
+        if (logThreads == null || logThreads.size() == 0)
+        {
+            if (identifier != null)
+            {
+                Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());
+                List<String> collectThreads = new ArrayList<>();
+                if (threadsInfoIterator.hasNext())
+                {
+                    ThreadsInfo info = threadsInfoIterator.next();
+                    info.getThreads().stream().filter(thread -> !thread.isIsDelete()).forEach(thread -> collectThreads.add(thread.getThreadName()));
+                }
+                logThreads = collectThreads;
+            }
+        }
+        if (identifier != null && logThreads != null && logThreads.size() > 0)
         {
             System.out.println("Prepare selector for processing:");
             logThreads.forEach(System.out::println);
