@@ -11,6 +11,7 @@ import com.my.home.parser.ParserManager;
 import com.my.home.plugin.IPluginStorage;
 import com.my.home.plugin.PluginFactoryImpl;
 import com.my.home.plugin.model.PluginToStore;
+import com.my.home.plugin.model.PluginType;
 import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
 import com.my.home.processor.ILogStorageCommand;
@@ -60,7 +61,7 @@ public class App implements ILogTreeListener
      */
     private Stage primaryStage;
     private boolean isStageInitialized;
-    private IUIController primaryController;
+    private MainWindowController primaryController;
     private String pluginDir;
 
 
@@ -147,7 +148,7 @@ public class App implements ILogTreeListener
         final ILogSaver saver = new MongoLogSaver(connection);
         final ILogRetriever retriever = new MongoLogRetriever(connection);
         final ILogNodeParser parser = parserManager.getParser("default");
-        final ILogProgress progress = new ProgressManager(((MainWindowController) primaryController).getProgressBar());
+        final ILogProgress progress = new ProgressManager(primaryController.getProgressBar());
         taskExecutor.setProgressManager(progress);
         ILogStorageContext context = new ILogStorageContext()
         {
@@ -204,16 +205,19 @@ public class App implements ILogTreeListener
             //  Init primary stage
             WindowFactory.fillStage(this.primaryStage, windows.get("main"));
             // Init UI controller for primary stage
-            primaryController = WindowFactory.getController(windows.get("main"));
-            MainWindowController castController = (MainWindowController) primaryController;
+            primaryController = (MainWindowController) WindowFactory.getController(windows.get("main"));
             //  Init Controller of log tree
-            treeController = new LogTreeController(castController.getLogTreeView());
+            treeController = new LogTreeController(primaryController.getLogTreeView());
             treeController.setTreeListener(this);
             //Init log manager
-            initLogManager(castController);
+            initLogManager(primaryController);
             //  Init listeners for drag and drop files to application (plugins, log)
-            castController.getRootElement().setOnDragOver(this::handleDragEvent);
-            castController.getRootElement().setOnDragDropped(this::handleDropEvent);
+            primaryController.getRootElement().setOnDragOver(this::handleDragEvent);
+            primaryController.getRootElement().setOnDragDropped(this::handleDropEvent);
+
+            //  Plugin handlers
+            primaryController.getAddSelectedPluginsBtn().setOnAction(event -> primaryController.addSelectedPluginsToBlock());
+            primaryController.getClearPluginsBlockBtn().setOnAction(event -> primaryController.removeAllPluginsFromBlock());
             //  Setup primary stage
             this.primaryStage.setMaximized(true);
             this.primaryStage.show();
@@ -533,12 +537,28 @@ public class App implements ILogTreeListener
     {
         ILogIdentifier identifier = logManager.getIdentifier();
         List<String> logThreads = logManager.getSelectedThreads();
-        if (logThreads.size() > 0)
+        if (logThreads == null || logThreads.size() == 0)
+        {
+            if (identifier != null)
+            {
+                Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());
+                List<String> collectThreads = new ArrayList<>();
+                if (threadsInfoIterator.hasNext())
+                {
+                    ThreadsInfo info = threadsInfoIterator.next();
+                    info.getThreads().stream().filter(thread -> !thread.isIsDelete()).forEach(thread -> collectThreads.add(thread.getThreadName()));
+                }
+                logThreads = collectThreads;
+            }
+        }
+        if (identifier != null && logThreads != null && logThreads.size() > 0)
         {
             System.out.println("Prepare selector for processing:");
             logThreads.forEach(System.out::println);
 
             //  TODO Implement pass selected threads into plugin processing
+            Map<PluginType, List<PluginToStore>> plugins = primaryController.getPluginsToProcess();
+            plugins.entrySet().forEach(entry -> System.out.println("Plugin type: " + entry.getKey() + "; number: " + entry.getValue().size()));
         }
 
     }

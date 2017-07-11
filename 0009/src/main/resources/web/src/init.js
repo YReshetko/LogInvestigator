@@ -4,20 +4,21 @@
 var view;
 function init()
 {
-	view = new ali.ThreadsViewer($( ".main-container" ));
+	if(view == null)
+	{
+		view = new ali.ThreadsViewer($( ".main-container" ));
+	}
 }
 
 function setThreads(threads)
 {
-	if(view == null)
-	{
-		init();
-	}
+	init();
 	view.constructThreads(threads);
 }
 
 function getSelectedThreads()
 {
+	init();
 	var selectedThreads = view.getSelectedThreads();
 	if(app != null)
 	{

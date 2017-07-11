@@ -1,6 +1,7 @@
 package com.my.home.plugin;
 
 import com.my.home.log.beans.LogNode;
+import com.my.home.plugin.model.PluginOutput;
 
 import java.util.Map;
 
@@ -18,5 +19,5 @@ public interface IPluginProcessor extends IPluginSetup
     /**
      * @return - result of plugin execution
      */
-    Map<String, Object> getResult();
+    PluginOutput getResult();
 }

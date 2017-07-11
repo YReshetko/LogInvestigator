@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--bean id="StorageContext" class="com.my.home.beans.LogStorageTestContext" lazy-init="true">
+        <property name="parser" ref="LogNodeParser"/>
+        <property name="saver" ref="LogSaver"/>
+        <property name="retriever" ref="LogRetriever"/>
+    </bean-->
+    <bean id="Application" class="com.my.home.ui.App" lazy-init="true">
+      <property name="windows" ref="fxmlWindows"/>
+      <property name="storageManager" ref="StorageManager"/>
+      <property name="parserManager" ref="ParserManager"/>
+      <property name="pluginDir" value="d:/plugins/"/>
+  </bean>
+
+    <bean id="StorageManager" class="com.my.home.storage.MongoStorageManager" lazy-init="true">
+        <constructor-arg value="app.properties" index="0"/>
+    </bean>
+    <bean id="ParserManager" class="com.my.home.parser.ParserManager" lazy-init="true">
+        <constructor-arg ref="LogNodeParser" index="0"/>
+    </bean>
+
+
+    <!--Map of window descriptions which uses the application-->
+    <bean id="fxmlWindows" class="java.util.HashMap" lazy-init="true">
+        <constructor-arg>
+            <map key-type="java.lang.String" value-type="com.my.home.ui.windows.WindowDescriptor">
+                <entry key="main" value-ref="mainWDesc"/>
+                <entry key="option" value-ref="optionWDesc"/>
+                <entry key="storageOption" value-ref="storageOWDesc"/>
+                <entry key="parserOption" value-ref="parserOWDesc"/>
+            </map>
+        </constructor-arg>
+    </bean>
+    <!--Description of main window-->
+    <bean id="mainWDesc" class="com.my.home.ui.windows.WindowDescriptor" lazy-init="true">
+        <property name="fxmlDoc" value="mainWindow.fxml"/>
+        <property name="title" value="Log investigator"/>
+        <property name="width" value="1024"/>
+        <property name="height" value="768"/>
+    </bean>
+    <!--Description of option window-->
+    <bean id="optionWDesc" class="com.my.home.ui.windows.WindowDescriptor" lazy-init="true">
+        <property name="fxmlDoc" value="option/options.fxml"/>
+        <property name="title" value="Options"/>
+        <property name="width" value="800"/>
+        <property name="height" value="600"/>
+    </bean>
+    <!--Description of storage option window-->
+    <bean id="storageOWDesc" class="com.my.home.ui.windows.WindowDescriptor" lazy-init="true">
+        <property name="fxmlDoc" value="option/mongoStorageOptions.fxml"/>
+        <property name="title" value="Storage options"/>
+        <property name="width" value="600"/>
+        <property name="height" value="300"/>
+    </bean>
+    <!--Description of parser option window-->
+    <bean id="parserOWDesc" class="com.my.home.ui.windows.WindowDescriptor" lazy-init="true">
+        <property name="fxmlDoc" value="option/parserLogOptions.fxml"/>
+        <property name="title" value="Parser options"/>
+        <property name="width" value="500"/>
+        <property name="height" value="600"/>
+    </bean>
+
+
+
+
+    <bean id="LogNodeParser" class="com.my.home.log.LogNodeParser" lazy-init="true" init-method="init">
+        <property name="commonStampPattern" value="D T,M \[L\] \[S\] \[C\] "/>
+        <!--property name="commonStampPattern" value="T"/-->
+        <property name="commonDataTimePattern" value="D T,M"/>
+        <property name="datePattern" value="[0-9]{4}\-[0-9]{2}\-[0-9]{2}"/>
+        <property name="timePattern" value="[0-9]{2}\:[0-9]{2}\:[0-9]{2}"/>
+        <property name="millisecondsPattern" value="[0-9]{3}"/>
+        <property name="logLevelPattern" value="[A-Z ]+"/>
+        <property name="threadPatten" value=".+?"/>
+        <property name="classPattern" value="[[a-z0-9]+\.]+[A-Z]{1}[a-zA-Z0-9]+"/>
+        <property name="dateFormat" value="yyyy-MM-dd"/>
+        <property name="timeFormat" value="HH:mm:ss"/>
+    </bean>
+    <bean id="MongoConnection" class="com.my.home.storage.mongo.impl.MongoConnection" lazy-init="true" init-method="init" destroy-method="closeConnection">
+        <property name="host" value="localhost"/>
+        <property name="port" value="27017"/>
+        <property name="dbName" value="log"/>
+    </bean>
+    <bean id="LogSaver" class="com.my.home.storage.mongo.impl.MongoLogSaver" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+    <bean id="LogRetriever" class="com.my.home.storage.mongo.impl.MongoLogRetriever" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+    <bean id="PluginFactory" class="com.my.home.plugin.PluginFactoryImpl" lazy-init="true">
+        <constructor-arg ref="PluginStorage" index="0"/>
+        <constructor-arg value="1000/src/main/resources/plugins/to/" index="1"/>
+    </bean>
+
+    <bean id="PluginStorage" class="com.my.home.storage.mongo.plugin.MongoPluginStorage" lazy-init="true">
+        <constructor-arg ref="MongoConnection"/>
+    </bean>
+</beans>

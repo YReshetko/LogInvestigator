@@ -2,6 +2,7 @@ package com.my.home.factory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  *
@@ -20,7 +21,8 @@ public class SpringBeanFactory implements IBeanFactory
         if(_instance == null)
         {
             _instance = new SpringBeanFactory();
-            _context = new ClassPathXmlApplicationContext(SPRING_CONFIG_FILE, SpringBeanFactory.class);
+            //_context = new ClassPathXmlApplicationContext(SPRING_CONFIG_FILE, SpringBeanFactory.class);
+            _context = new FileSystemXmlApplicationContext(SPRING_CONFIG_FILE);
         }
         return _instance;
     }
