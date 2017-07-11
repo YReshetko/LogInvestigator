@@ -65,7 +65,24 @@
                 <configuration>
                     <vendor>MyHomeCompany</vendor>
                     <mainClass>com.my.home.Runner</mainClass>
+                    <bundler>EXE</bundler>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>create-jfxjar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-native</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build-native</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
