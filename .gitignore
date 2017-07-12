@@ -4,5 +4,5 @@
 */*.class
 */target
 artifacts
-lib
+/lib
 out
