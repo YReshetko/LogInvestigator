@@ -83,13 +83,21 @@ public class MongoStorageManager
                         properties.getProperty("storage.mongo.path"),
                         properties.getProperty("storage.mongo.db.path")));
         dbProcess.start();
-        while (!dbProcess.isConnected())
+        while (true)
         {
+            System.out.print("");
+            boolean isConnected = dbProcess.isConnected();
+            if (isConnected)
+            {
+                System.out.println("MONGO CONNECTED");
+                break;
+            }
             if(dbProcess.checkIfInterrupted())
             {
                 throw new RuntimeException("Can't create connection");
             }
         }
+        System.out.println("FINISH STORAGE INITIALIZATION");
     }
     public void closeDB()
     {

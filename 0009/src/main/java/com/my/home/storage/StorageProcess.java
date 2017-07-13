@@ -3,6 +3,8 @@ package com.my.home.storage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -31,12 +33,26 @@ public class StorageProcess extends Thread
             dbProcess = runtime.exec(command);
             String line;
             BufferedReader reader = new BufferedReader(new InputStreamReader(dbProcess.getInputStream()));
+            Pattern pattern = Pattern.compile(DETECT_IF_CONNECTED);
+
             while ((line = reader.readLine()) != null)
             {
-                System.out.println(line);
-                if(line.contains(DETECT_IF_CONNECTED))
+
+                if(!isConnected /*&& line.matches(DETECT_IF_CONNECTED)*/ /*line.contains(DETECT_IF_CONNECTED)*/)
                 {
-                    isConnected = true;
+
+                    Matcher matcher = pattern.matcher(line);
+                    boolean result = matcher.find();
+                    System.out.println("Find in line:\n" + line + "\n regexp: " + pattern.pattern() + "\n result: " + result);
+                    if(result)
+                    {
+                        System.out.println("Set connected");
+                        isConnected = true;
+                    }
+                }
+                else
+                {
+                    System.out.println(line);
                 }
             }
             System.out.println(dbProcess);

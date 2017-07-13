@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  *
@@ -24,6 +26,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
     private final ILogProgress progress;
     private final ILogIdentifier identifier;
     private List<File> files;
+    private final ExecutorService executor;
     public ParseLogProcess(ILogStorageContext context, List<File> files, ILogIdentifier identifier)
     {
         this.parser = context.getParser();
@@ -31,6 +34,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         this.progress = context.getProgress();
         this.identifier = identifier;
         this.files = files;
+        this.executor = Executors.newFixedThreadPool(10);
     }
     @Override
     public ILogIdentifier call()
@@ -97,6 +101,15 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        finally
+        {
+            executor.shutdown();
+            //  Wait all threads
+            while (!executor.isTerminated())
+            {
+
+            }
+        }
         return identifier;
     }
 
@@ -115,7 +128,9 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         node.setId(index);
         //  Before saving log node we need to cache meta inf
         cache.cacheMetaInf(node);
-        return saver.saveNode(identifier, node);
+        executor.execute(new SimpleNodeSaverProcess(identifier, node));
+        //return saver.saveNode(identifier, node);
+        return true;
     }
 
     /**
@@ -190,5 +205,32 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         }
 
         return out;
+    }
+
+    private class SimpleNodeSaverProcess implements Runnable
+    {
+        private ILogIdentifier identifier;
+        private LogNode node;
+        public SimpleNodeSaverProcess(ILogIdentifier identifier, LogNode node)
+        {
+            this.identifier = identifier;
+            this.node = node;
+        }
+
+        /**
+         * When an object implementing interface <code>Runnable</code> is used
+         * to create a thread, starting the thread causes the object's
+         * <code>run</code> method to be called in that separately executing
+         * thread.
+         * <p>
+         * The general contract of the method <code>run</code> is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+            saver.saveNode(identifier, node);
+        }
     }
 }
