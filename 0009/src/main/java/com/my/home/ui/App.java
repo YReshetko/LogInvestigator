@@ -642,6 +642,7 @@ public class App implements ILogTreeListener
                 node.setThread(thread);
                 nodes.add(node);
             });
+            //  TODO create command where log nodes will be chosen by ID
             ILogStorageCommand command = new FindNodesCommand();
             command.setData(identifier, nodes.toArray());
             String fileTestToSave = storage.getLog(identifier, command);

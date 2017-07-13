@@ -111,6 +111,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
      */
     private boolean saveOneNode(String line, ILogIdentifier identifier, Long index, LogMetaInfCache cache) throws ParseException
     {
+        //  TODO Make Asynch saving
         LogNode node = parser.parse(line);
         node.setId(index);
         //  Before saving log node we need to cache meta inf
