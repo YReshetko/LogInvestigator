@@ -13,6 +13,7 @@
       <property name="storageManager" ref="StorageManager"/>
       <property name="parserManager" ref="ParserManager"/>
       <property name="pluginDir" value="d:/plugins/"/>
+      <property name="logSavingStrategy" value="ASYNC"/>
   </bean>
 
     <bean id="StorageManager" class="com.my.home.storage.MongoStorageManager" lazy-init="true">

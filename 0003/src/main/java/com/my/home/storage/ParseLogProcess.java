@@ -2,9 +2,10 @@ package com.my.home.storage;
 
 import com.my.home.log.beans.LogBlock;
 import com.my.home.log.beans.LogNode;
-import com.my.home.log.beans.ThreadDescriptor;
-import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.processor.ILogProgress;
+import com.my.home.storage.strategy.AsyncLogSaving;
+import com.my.home.storage.strategy.ILogSavingStrategy;
+import com.my.home.storage.strategy.SyncLogSaving;
 
 import java.io.*;
 import java.text.ParseException;
@@ -12,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -22,19 +21,20 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
 {
 
     private final ILogNodeParser parser;
-    private final ILogSaver saver;
     private final ILogProgress progress;
     private final ILogIdentifier identifier;
+    private final ILogSavingStrategy savingStrategy;
     private List<File> files;
-    private final ExecutorService executor;
     public ParseLogProcess(ILogStorageContext context, List<File> files, ILogIdentifier identifier)
     {
         this.parser = context.getParser();
-        this.saver = context.getSaver();
         this.progress = context.getProgress();
+        SavingStrategyType savingType = SavingStrategyType.valueOf(context.getSavingStrategy());
+        savingStrategy = savingType.getStrategy(context.getSaver());
         this.identifier = identifier;
         this.files = files;
-        this.executor = Executors.newFixedThreadPool(10);
+
+
     }
     @Override
     public ILogIdentifier call()
@@ -44,14 +44,12 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
             //  We need to sort LogBlocks by time to save all parts of log
             Collections.sort(blocks, (o1, o2) -> Long.compare(o1.getStartTime(), o2.getStartTime()));
             //  Calculate total size of all files (for future to make it as thread)
-            long totalSize = blocks.stream().mapToLong(value -> value.getSize()).sum();
+            long totalSize = blocks.stream().mapToLong(LogBlock::getSize).sum();
             progress.addTotalSize(totalSize);
             //Process of saving log nodes
             BufferedReader br = null;
             String line;
             StringBuilder logBuffer = null;
-            LogNode node;
-            LogMetaInfCache cache = new LogMetaInfCache();
             boolean result = true;
             long index = 0L;
             for (LogBlock block : blocks)
@@ -66,7 +64,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
                         if (logBuffer != null)
                         {
                             index++;
-                            result &= saveOneNode(logBuffer.toString(), identifier, index, cache);
+                            result &= saveOneNode(logBuffer.toString(), identifier, index);
                         }
                         logBuffer = new StringBuilder(line);
                     }
@@ -82,34 +80,24 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
                 }
             }
             index++;
-            result &= saveOneNode(logBuffer.toString(), identifier, index, cache);
+            if (logBuffer != null)
+            {
+                result &= saveOneNode(logBuffer.toString(), identifier, index);
+            }
             if (result)
             {
-                result &= saveMetaInf(identifier, cache);
+                savingStrategy.invalidate(identifier);
             }
-            saver.complete(identifier);
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        catch (ParseException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        finally
-        {
-            executor.shutdown();
-            //  Wait all threads
-            while (!executor.isTerminated())
-            {
 
-            }
         }
+        catch (ParseException | IOException e)
+        {
+            e.printStackTrace();
+        }
+        /*finally
+        {
+            savingStrategy.invalidate();
+        }*/
         return identifier;
     }
 
@@ -118,36 +106,18 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
      * @param line - string for node
      * @param identifier - log identifier
      * @param index - node index
-     * @param cache - cache of nodes metainf
      * @return - true if saving has success
      * @throws ParseException - unexpected parsing exception
      */
-    private boolean saveOneNode(String line, ILogIdentifier identifier, Long index, LogMetaInfCache cache) throws ParseException
+    private boolean saveOneNode(String line, ILogIdentifier identifier, Long index) throws ParseException
     {
-        //  TODO Make Asynch saving
         LogNode node = parser.parse(line);
         node.setId(index);
-        //  Before saving log node we need to cache meta inf
-        cache.cacheMetaInf(node);
-        executor.execute(new SimpleNodeSaverProcess(identifier, node));
-        //return saver.saveNode(identifier, node);
+        savingStrategy.saving(identifier, node);
         return true;
     }
 
-    /**
-     * Save meta information about log (threads info)
-     * @param identifier - log identifier
-     * @param cache - cache where was collected meta inf
-     * @return - true if saving has success
-     */
-    private boolean saveMetaInf(ILogIdentifier identifier, LogMetaInfCache cache)
-    {
-        List<ThreadDescriptor> descriptors = cache.getThreadDescriptors();
-        descriptors.forEach(value -> saver.saveThreadDescriptor(identifier, value));
-        ThreadsInfo info = cache.getThreadsInfo();
-        saver.saveThreadsInfo(identifier, info);
-        return true;
-    }
+
     /**
      * LogBlock contains log file name and first time in log to determine correct sequence of files
      * to make correct nodes if parts of node are contained in different files
@@ -208,30 +178,24 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         return out;
     }
 
-    private class SimpleNodeSaverProcess implements Runnable
+    private enum SavingStrategyType
     {
-        private ILogIdentifier identifier;
-        private LogNode node;
-        public SimpleNodeSaverProcess(ILogIdentifier identifier, LogNode node)
-        {
-            this.identifier = identifier;
-            this.node = node;
-        }
-
-        /**
-         * When an object implementing interface <code>Runnable</code> is used
-         * to create a thread, starting the thread causes the object's
-         * <code>run</code> method to be called in that separately executing
-         * thread.
-         * <p>
-         * The general contract of the method <code>run</code> is that it may
-         * take any action whatsoever.
-         *
-         * @see Thread#run()
-         */
+        ASYNC
+                {
+            @Override
+            public ILogSavingStrategy getStrategy(ILogSaver saver)
+            {
+                return new AsyncLogSaving(saver);
+            }
+        },
+        SYNC
+                {
         @Override
-        public void run() {
-            saver.saveNode(identifier, node);
+        public ILogSavingStrategy getStrategy(ILogSaver saver)
+        {
+            return new SyncLogSaving(saver);
         }
+    };
+        public abstract ILogSavingStrategy getStrategy(ILogSaver saver);
     }
 }

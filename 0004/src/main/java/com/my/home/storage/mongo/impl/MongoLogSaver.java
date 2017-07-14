@@ -46,6 +46,9 @@ public class MongoLogSaver extends MongoLogBase implements ILogSaver
     @Override
     public boolean complete(ILogIdentifier identifier)
     {
-        return save(identifier, identifier.getLogDescriptor());
+        save(identifier, identifier.getLogDescriptor());
+        IMongoLogAccess access = getAccess(identifier, getCollection(LogNode.class));
+        access.indexing("{\"id\": 1}");
+        return true;
     }
 }

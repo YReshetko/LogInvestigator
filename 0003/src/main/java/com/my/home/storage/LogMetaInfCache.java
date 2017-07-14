@@ -17,7 +17,7 @@ public class LogMetaInfCache
     {
         cache = new LinkedHashMap<>();
     }
-    void cacheMetaInf(LogNode node)
+    public void cacheMetaInf(LogNode node)
     {
         String threadKey = node.getThread();
         String nodeFileName = String.valueOf(node.getId());
@@ -37,7 +37,7 @@ public class LogMetaInfCache
         descriptor.getNodesNumbers().add(nodeFileName);
         descriptor.setEndTime(node.getLongDateTime());
     }
-    ThreadsInfo getThreadsInfo()
+    public ThreadsInfo getThreadsInfo()
     {
         ThreadsInfo threadsInfo = new ThreadsInfo();
         ThreadEntry threadEntry;
@@ -57,7 +57,7 @@ public class LogMetaInfCache
         Collections.sort(threadsInfo.getThreads(), (o1, o2) -> Long.compare(o1.getStartTime(), o2.getStartTime()));
         return threadsInfo;
     }
-    List<ThreadDescriptor> getThreadDescriptors()
+    public List<ThreadDescriptor> getThreadDescriptors()
     {
         final List<ThreadDescriptor> out = new ArrayList<>();
         cache.values().forEach(value -> out.add(value));

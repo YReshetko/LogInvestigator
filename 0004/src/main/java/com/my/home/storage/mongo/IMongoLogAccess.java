@@ -14,7 +14,7 @@ public interface IMongoLogAccess<V>
     void insert(String value);
 
     void update(String oldValue, String newValue);
-
+    void indexing(String keys);
     void removeAll();
     void remove(String value);
     void setSortBy(String field);

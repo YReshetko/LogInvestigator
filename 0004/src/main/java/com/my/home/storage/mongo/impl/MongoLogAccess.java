@@ -80,6 +80,12 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
     public void remove(String value) {
 
     }
+    @Override
+    public void indexing(String keys)
+    {
+        DBObject dbKey = (DBObject) JSON.parse(keys);
+        collection.createIndex(dbKey);
+    }
 
     @Override
     public void setSortBy(String field) {

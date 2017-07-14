@@ -15,4 +15,6 @@ public interface ILogStorageContext
     ILogSaver getSaver();
     ILogRetriever getRetriever();
     ILogProgress getProgress();
+    String getSavingStrategy();
+
 }

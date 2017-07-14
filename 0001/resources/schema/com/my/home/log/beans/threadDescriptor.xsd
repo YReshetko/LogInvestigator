@@ -7,10 +7,15 @@
     <xsd:complexType name="ThreadDescriptor">
         <xsd:sequence>
             <xsd:element name="nodesNumbers" maxOccurs="unbounded" type="xsd:string"/>
+            <xsd:element name="idRanges" maxOccurs="unbounded" type="LogIdRange"/>
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:long"/>
         <xsd:attribute name="name" type="xsd:string"/>
         <xsd:attribute name="startTime" type="xsd:long"/>
         <xsd:attribute name="endTime" type="xsd:long"/>
+    </xsd:complexType>
+    <xsd:complexType name="LogIdRange">
+        <xsd:attribute name="firstId" type="xsd:long"/>
+        <xsd:attribute name="lastId" type="xsd:long"/>
     </xsd:complexType>
 </xsd:schema>

@@ -99,6 +99,7 @@ public class App implements ILogTreeListener
 
     private MainLogManager logManager;
 
+    private String logSavingStrategy;
     /**
      * Init application, runs once when application starts
      * @param primaryStage - primary stage comes from JavaFX framework
@@ -171,6 +172,11 @@ public class App implements ILogTreeListener
             @Override
             public ILogProgress getProgress() {
                 return progress;
+            }
+
+            @Override
+            public String getSavingStrategy() {
+                return logSavingStrategy;
             }
         };
 
@@ -440,6 +446,11 @@ public class App implements ILogTreeListener
     public void setPluginDir(String pluginDir)
     {
         this.pluginDir = pluginDir;
+    }
+
+    public void setLogSavingStrategy(String logSavingStrategy)
+    {
+        this.logSavingStrategy = logSavingStrategy;
     }
 
     /**

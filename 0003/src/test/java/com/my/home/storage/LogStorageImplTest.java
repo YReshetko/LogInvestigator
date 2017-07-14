@@ -186,6 +186,11 @@ public class LogStorageImplTest extends TestBase
                 }
             };
         }
+
+        @Override
+        public String getSavingStrategy() {
+            return "SYNC";
+        }
     }
 
     /**
