@@ -1,5 +1,6 @@
 package com.my.home.storage;
 
+import com.my.home.log.beans.LogIdRange;
 import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadEntry;
@@ -60,8 +61,41 @@ public class LogMetaInfCache
     public List<ThreadDescriptor> getThreadDescriptors()
     {
         final List<ThreadDescriptor> out = new ArrayList<>();
-        cache.values().forEach(value -> out.add(value));
+        cache.values().forEach(value -> out.add(calculateRange(value)));
         return out;
+    }
+
+    public ThreadDescriptor calculateRange(ThreadDescriptor descriptor)
+    {
+        // TODO needs optimization
+        Collections.sort(descriptor.getNodesNumbers());
+        LogIdRange range = null;
+        List<LogIdRange> ranges = new ArrayList<>();
+        for (String id : descriptor.getNodesNumbers())
+        {
+            Long lId = Long.valueOf(id);
+            if(range == null)
+            {
+                range = new LogIdRange();
+                range.setFirstId(lId);
+                range.setLastId(lId);
+                ranges.add(range);
+                continue;
+            }
+            if(lId - range.getLastId() == 1)
+            {
+                range.setLastId(lId);
+            }
+            else
+            {
+                range = new LogIdRange();
+                range.setFirstId(lId);
+                range.setLastId(lId);
+                ranges.add(range);
+            }
+        }
+        descriptor.getIdRanges().addAll(ranges);
+        return descriptor;
     }
 
 }

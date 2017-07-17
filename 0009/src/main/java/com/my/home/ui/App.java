@@ -3,6 +3,7 @@ package com.my.home.ui;
 import com.my.home.log.LogIdentifierImpl;
 import com.my.home.log.beans.LogFilesDescriptor;
 import com.my.home.log.beans.LogNode;
+import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.log.manager.ILogManager;
 import com.my.home.log.manager.MainLogManager;
@@ -692,5 +693,21 @@ public class App implements ILogTreeListener
 
         }
         return null;
+    }
+
+    private void prepareLogNodeRequestByIdRanges(ILogIdentifier identifier, List<String> logThreads)
+    {
+        if(logThreads != null && logThreads.size()>0)
+        {
+            List<ThreadDescriptor> descriptors = new ArrayList<>();
+            logThreads.forEach(name -> {
+                ThreadDescriptor descriptor = new ThreadDescriptor();
+                descriptor.setName(name);
+                descriptors.add(descriptor);
+            });
+            ILogStorageCommand<ThreadDescriptor> descriptorILogStorageCommand = new FindThreadsDescriptionCommand(descriptors);
+            Iterator<ThreadDescriptor> descIter = storage.getIterator(identifier, descriptorILogStorageCommand);
+
+        }
     }
 }
