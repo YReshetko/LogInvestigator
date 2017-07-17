@@ -3,6 +3,7 @@ package com.my.home.storage.mongo.commands;
 import com.my.home.log.beans.LogIdRange;
 import com.my.home.log.beans.LogNode;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  */
 public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
 {
+    private static final String BETWEEN_RANGE = "{$and:[ {\"id\" : {$gte : %o}}, {\"id\" : {$lte : %o}}]}";
 
     private List<LogIdRange> ranges;
     public FindNodesByIdRangeCommand(List<LogIdRange> ranges)
@@ -28,13 +30,12 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
          * TODO example:
          * TODO: { $or:[ {$and:[ {"id":{$gte:20}}, {"id":{$lte:23}}]}, {$and:[ {"id":{$gte:30}}, {"id":{$lte:34}}]} ]}
          */
-        /*List<String> cases = getListCommand(value);
+        List<String> cases = getListCommand();
         StringBuilder builder = new StringBuilder();
         builder.append("{$or : [");
         builder.append(split(cases));
         builder.append("]}");
-        return builder.toString();*/
-        return null;
+        return builder.toString();
     }
 
     @Override
@@ -49,5 +50,12 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
     @Override
     public String sortBy() {
         return "id";
+    }
+
+    private List<String> getListCommand()
+    {
+        List<String> out = new ArrayList<>();
+        ranges.forEach(range -> out.add(String.format(BETWEEN_RANGE, range.getFirstId(), range.getLastId())));
+        return out;
     }
 }

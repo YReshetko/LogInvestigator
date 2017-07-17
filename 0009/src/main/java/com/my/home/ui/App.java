@@ -1,10 +1,7 @@
 package com.my.home.ui;
 
 import com.my.home.log.LogIdentifierImpl;
-import com.my.home.log.beans.LogFilesDescriptor;
-import com.my.home.log.beans.LogNode;
-import com.my.home.log.beans.ThreadDescriptor;
-import com.my.home.log.beans.ThreadsInfo;
+import com.my.home.log.beans.*;
 import com.my.home.log.manager.ILogManager;
 import com.my.home.log.manager.MainLogManager;
 import com.my.home.log.manager.web.WebLogManager;
@@ -648,15 +645,15 @@ public class App implements ILogTreeListener
     {
         if(logThreads.size() > 0)
         {
-            List<LogNode> nodes = new ArrayList<>(logThreads.size());
+            /*List<LogNode> nodes = new ArrayList<>(logThreads.size());
             logThreads.forEach(thread -> {
                 LogNode node = new LogNode();
                 node.setThread(thread);
                 nodes.add(node);
-            });
+            });*/
             //  TODO create command where log nodes will be chosen by ID
-            ILogStorageCommand command = new FindNodesCommand();
-            command.setData(identifier, nodes.toArray());
+            ILogStorageCommand<LogNode> command = prepareLogNodeRequestByIdRanges(identifier, logThreads);
+            //command.setData(identifier, nodes.toArray());
             String fileTestToSave = storage.getLog(identifier, command);
             File file = FileChooserUtil.saveFile(getStageByName(null), "Save file", logThreads.get(0) + ".log", "*.log");
             FileWriter writer = null;
@@ -695,8 +692,9 @@ public class App implements ILogTreeListener
         return null;
     }
 
-    private void prepareLogNodeRequestByIdRanges(ILogIdentifier identifier, List<String> logThreads)
+    private ILogStorageCommand<LogNode> prepareLogNodeRequestByIdRanges(ILogIdentifier identifier, List<String> logThreads)
     {
+        ILogStorageCommand<LogNode> selectNodes = null;
         if(logThreads != null && logThreads.size()>0)
         {
             List<ThreadDescriptor> descriptors = new ArrayList<>();
@@ -707,7 +705,12 @@ public class App implements ILogTreeListener
             });
             ILogStorageCommand<ThreadDescriptor> descriptorILogStorageCommand = new FindThreadsDescriptionCommand(descriptors);
             Iterator<ThreadDescriptor> descIter = storage.getIterator(identifier, descriptorILogStorageCommand);
-
+            List<LogIdRange> ranges = new ArrayList<>();
+            descIter.forEachRemaining(descript -> {
+                descript.getIdRanges().forEach(range -> ranges.add(range));
+            });
+            selectNodes = new FindNodesByIdRangeCommand(ranges);
         }
+        return selectNodes;
     }
 }
