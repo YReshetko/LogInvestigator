@@ -76,7 +76,7 @@
         <property name="millisecondsPattern" value="[0-9]{3}"/>
         <property name="logLevelPattern" value="[A-Z ]+"/>
         <property name="threadPatten" value=".+?"/>
-        <property name="classPattern" value="[[a-z0-9]+\.]+[A-Z]{1}[a-zA-Z0-9]+"/>
+        <property name="classPattern" value="[[a-z0-9]+\.]+[a-zA-Z]{1}[a-zA-Z0-9]+"/>
         <property name="dateFormat" value="yyyy-MM-dd"/>
         <property name="timeFormat" value="HH:mm:ss"/>
     </bean>

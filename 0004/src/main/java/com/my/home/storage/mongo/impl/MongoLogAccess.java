@@ -134,9 +134,10 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
          *          if the iteration has no more elements
          */
         @Override
-        public V next() {
-
-            return JsonUtils.getObject(JSON.serialize(cursor.next()), vClass);
+        public V next()
+        {
+            DBObject retrieved = cursor.next();
+            return JsonUtils.getObject(JSON.serialize(retrieved), vClass);
         }
     }
 }

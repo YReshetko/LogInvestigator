@@ -12,14 +12,17 @@ import java.util.List;
  */
 public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
 {
-    private static final String BETWEEN_RANGE = "{$and:[ {\"id\" : {$gte : %o}}, {\"id\" : {$lte : %o}}]}";
+    private static final String BETWEEN_RANGE = "{$and:[ {\"id\" : {$gte : %s}}, {\"id\" : {$lte : %s}}]}";
+    private static final String EXACT_RANGE = "{\"id\" : %s}";
 
     private List<LogIdRange> ranges;
     public FindNodesByIdRangeCommand(List<LogIdRange> ranges)
     {
-        this.ranges = ranges;
+
         Collections.sort(ranges, (o1, o2) -> o1.getFirstId().compareTo(o2.getFirstId()));
 
+        //this.ranges = ranges;
+        this.ranges = spliceRanges(ranges);
     }
     @Override
     public String getSelector()
@@ -55,7 +58,34 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
     private List<String> getListCommand()
     {
         List<String> out = new ArrayList<>();
-        ranges.forEach(range -> out.add(String.format(BETWEEN_RANGE, range.getFirstId(), range.getLastId())));
+        ranges.forEach(range -> out.add((range.getFirstId().equals(range.getLastId()))?
+                String.format(EXACT_RANGE, range.getFirstId()):
+                String.format(BETWEEN_RANGE, range.getFirstId(), range.getLastId())
+        ));
+        return out;
+    }
+
+    private List<LogIdRange> spliceRanges(List<LogIdRange> ranges)
+    {
+        List<LogIdRange> out = new ArrayList<>();
+        LogIdRange range = new LogIdRange();
+        range.setFirstId(ranges.get(0).getFirstId());
+        range.setLastId(ranges.get(0).getLastId());
+        for (int i = 1; i < ranges.size(); i++)
+        {
+            if(ranges.get(i).getFirstId() - range.getLastId() == 1)
+            {
+                range.setLastId(ranges.get(i).getLastId());
+            }
+            else
+            {
+                out.add(range);
+                range = new LogIdRange();
+                range.setFirstId(ranges.get(i).getFirstId());
+                range.setLastId(ranges.get(i).getLastId());
+            }
+        }
+        out.add(range);
         return out;
     }
 }
