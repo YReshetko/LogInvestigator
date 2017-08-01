@@ -6,8 +6,7 @@ import com.my.home.log.manager.ILogManager;
 import com.my.home.log.manager.MainLogManager;
 import com.my.home.log.manager.web.WebLogManager;
 import com.my.home.parser.ParserManager;
-import com.my.home.plugin.IPluginStorage;
-import com.my.home.plugin.PluginFactoryImpl;
+import com.my.home.plugin.*;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
 import com.my.home.processor.ILogProgress;
@@ -89,7 +88,7 @@ public class App implements ILogTreeListener
     private ILogStorage storage;
 
     private IPluginStorage pluginStorage;
-    private PluginFactoryImpl pluginFactory;
+    private IPluginFactory pluginFactory;
 
     private AppTaskExecutor taskExecutor;
 
@@ -568,6 +567,44 @@ public class App implements ILogTreeListener
             //  TODO Implement pass selected threads into plugin processing
             Map<PluginType, List<PluginToStore>> plugins = primaryController.getPluginsToProcess();
             plugins.entrySet().forEach(entry -> System.out.println("Plugin type: " + entry.getKey() + "; number: " + entry.getValue().size()));
+            if (!plugins.isEmpty())
+            {
+                List<IPluginSelector> selectors = new ArrayList<>();
+                List<IPluginFilter> filters = new ArrayList<>();
+                List<IPluginProcessor> processors = new ArrayList<>();
+                List<IPluginPostProcessor> postProcessors = new ArrayList<>();
+                for (Map.Entry<PluginType, List<PluginToStore>> entry : plugins.entrySet())
+                {
+
+                    switch (entry.getKey())
+                    {
+                        case SELECTOR:
+                            entry.getValue().forEach(plugin -> selectors.add(pluginFactory.getPlugin(plugin)));
+                            break;
+                        case FILTER:
+                            entry.getValue().forEach(plugin -> filters.add(pluginFactory.getPlugin(plugin)));
+                            break;
+                        case PROCESSOR:
+                            entry.getValue().forEach(plugin -> processors.add(pluginFactory.getPlugin(plugin)));
+                            break;
+                        case POST_PROCESSOR:
+                            entry.getValue().forEach(plugin -> postProcessors.add(pluginFactory.getPlugin(plugin)));
+                            break;
+                        default:
+                            System.out.println("Unknown plugin type: " + entry.getKey());
+                    }
+                }
+                ILogStorageCommand<LogNode> command = prepareLogNodeRequestByIdRanges(identifier, logThreads);
+                Iterator<LogNode> selectedLog = storage.getIterator(identifier, command);
+                // TODO set plugins and selected log into processing
+                // TODO get from processing feature task
+
+            }
+            else
+            {
+                //  TODO create UI notification to choose plugin
+                System.out.println("No one plugin was selected");
+            }
         }
 
     }
