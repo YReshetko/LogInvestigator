@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>LogInvestigator</artifactId>
+        <groupId>LogInvestigator</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <dependencies>
+        <dependency>
+            <groupId>LogInvestigator</groupId>
+            <artifactId>DataModel</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../artifacts/DataModel-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>LogInvestigator</groupId>
+            <artifactId>LogStorageInterface</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../artifacts/LogStorageInterface-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>LogInvestigator</groupId>
+            <artifactId>ProjectUtils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../artifacts/ProjectUtils-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+    </dependencies>
+    <artifactId>LogProcessing</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>LogProcessing</name>
+
+</project>

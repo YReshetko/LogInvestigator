@@ -7,8 +7,11 @@ import com.my.home.log.manager.MainLogManager;
 import com.my.home.log.manager.web.WebLogManager;
 import com.my.home.parser.ParserManager;
 import com.my.home.plugin.*;
+import com.my.home.plugin.model.PluginOutput;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
+import com.my.home.plugin.processing.ILogPluginProcessing;
+import com.my.home.plugin.processing.ProcessingConfigurationBean;
 import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
 import com.my.home.processor.ILogStorageCommand;
@@ -20,6 +23,7 @@ import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
 import com.my.home.storage.mongo.plugin.MongoPluginStorage;
 import com.my.home.task.AfterParseLogTask;
+import com.my.home.task.AfterProcessingLogTask;
 import com.my.home.task.executor.AppTaskExecutor;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.MainWindowController;
@@ -97,6 +101,12 @@ public class App implements ILogTreeListener
     private MainLogManager logManager;
 
     private String logSavingStrategy;
+
+    /**
+     * TODO Initialize the processing similar as "private ILogStorage storage;"
+     * TODO don't forget to setup ILogStorageContext IMPORTANT!
+     */
+    private ILogPluginProcessing logPluginProcessing;
     /**
      * Init application, runs once when application starts
      * @param primaryStage - primary stage comes from JavaFX framework
@@ -541,6 +551,11 @@ public class App implements ILogTreeListener
         }
     }
 
+    /**
+     * Handle the button "Process"
+     * Prepare iterator for selected log and selected processors
+     * @param event - Button event
+     */
     private void handleProcessSelectedLog(ActionEvent event)
     {
         ILogIdentifier identifier = logManager.getIdentifier();
@@ -596,8 +611,16 @@ public class App implements ILogTreeListener
                 }
                 ILogStorageCommand<LogNode> command = prepareLogNodeRequestByIdRanges(identifier, logThreads);
                 Iterator<LogNode> selectedLog = storage.getIterator(identifier, command);
-                // TODO set plugins and selected log into processing
-                // TODO get from processing feature task
+                ProcessingConfigurationBean config = new ProcessingConfigurationBean();
+                config
+                        .addFilters(filters)
+                        .addSelectors(selectors)
+                        .addProcessors(processors)
+                        .addPostProcessors(postProcessors)
+                        .addLog(selectedLog);
+                Future<List<PluginOutput>> outputs = logPluginProcessing.process(config);
+                // TODO may need to add parameters into constructor
+                taskExecutor.addTask(new AfterProcessingLogTask(outputs));
 
             }
             else
