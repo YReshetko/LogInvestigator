@@ -10,7 +10,9 @@ import com.my.home.plugin.*;
 import com.my.home.plugin.model.PluginOutput;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
+import com.my.home.plugin.model.Result;
 import com.my.home.plugin.processing.ILogPluginProcessing;
+import com.my.home.plugin.processing.LogPluginProcessingImpl;
 import com.my.home.plugin.processing.ProcessingConfigurationBean;
 import com.my.home.processor.ILogProgress;
 import com.my.home.processor.ILogStorage;
@@ -191,7 +193,12 @@ public class App implements ILogTreeListener
         {
             storage = new LogStorageImpl();
         }
+        if (logPluginProcessing == null)
+        {
+            logPluginProcessing = new LogPluginProcessingImpl();
+        }
         storage.setStorageContext(context);
+        logPluginProcessing.setStorageContext(context);
         pluginStorage = new MongoPluginStorage(connection);
         pluginFactory = new PluginFactoryImpl(pluginStorage, pluginDir);
         //  INIT Tree view by all loaded files
@@ -620,8 +627,7 @@ public class App implements ILogTreeListener
                         .addLog(selectedLog);
                 Future<List<PluginOutput>> outputs = logPluginProcessing.process(config);
                 // TODO may need to add parameters into constructor
-                taskExecutor.addTask(new AfterProcessingLogTask(outputs));
-
+                taskExecutor.addTask(new AfterProcessingLogTask(outputs, this));
             }
             else
             {
@@ -630,6 +636,19 @@ public class App implements ILogTreeListener
             }
         }
 
+    }
+
+    public void setPluginWorkOutput(List<PluginOutput> result)
+    {
+        result.forEach(System.out::println);
+        for (PluginOutput plugOut : result)
+        {
+            for (Result res : plugOut.getStringResult())
+            {
+                System.out.println(res.getDescription() + " : " + res.getValue());
+            }
+
+        }
     }
 
     private void handleDeleteSelectedLog(ActionEvent event)

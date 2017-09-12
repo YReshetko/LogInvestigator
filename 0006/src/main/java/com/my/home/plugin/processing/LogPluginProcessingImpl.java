@@ -1,7 +1,6 @@
 package com.my.home.plugin.processing;
 
 import com.my.home.plugin.model.PluginOutput;
-import com.my.home.storage.ILogIdentifier;
 import com.my.home.storage.ILogStorageContext;
 
 import java.util.List;

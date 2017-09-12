@@ -7,6 +7,7 @@
     <xsd:complexType name="PluginOutput">
         <xsd:sequence>
             <xsd:element name="stringResult" maxOccurs="unbounded" type="Result"/>
+            <xsd:element name="tableResult" maxOccurs="unbounded" type="TableResult"/>
         </xsd:sequence>
     </xsd:complexType>
     <xsd:complexType name="TableResult">
