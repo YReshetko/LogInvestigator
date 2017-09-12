@@ -29,12 +29,14 @@ import com.my.home.task.AfterProcessingLogTask;
 import com.my.home.task.executor.AppTaskExecutor;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.MainWindowController;
+import com.my.home.ui.controllers.result.SimpleResultSample;
 import com.my.home.ui.tree.ILogTreeListener;
 import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.CsvUtil;
 import com.my.home.util.FileChooserUtil;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Parent;
 import javafx.scene.input.DragEvent;
@@ -120,6 +122,9 @@ public class App implements ILogTreeListener
         modalWindows = new HashMap<>();
         this.primaryStage = primaryStage;
         taskExecutor = new AppTaskExecutor();
+        /*Platform.runLater(() -> {
+            taskExecutor.start();
+        });*/
         try
         {
             initApplicationContext();
@@ -642,38 +647,15 @@ public class App implements ILogTreeListener
     public void setPluginWorkOutput(List<PluginOutput> result)
     {
         result.forEach(System.out::println);
-        String csvFile = "PluginResult.csv";
-        FileWriter writer = null;
-        try
-        {
-            writer = new FileWriter(csvFile);
-            CsvUtil.writeLine(writer, Arrays.asList("Description", "Value"));
-            for (PluginOutput plugOut : result) {
-                for (Result res : plugOut.getStringResult()) {
-                    //System.out.println(res.getDescription() + " : " + res.getValue());
-                    CsvUtil.writeLine(writer, Arrays.asList(res.getDescription(), res.getValue()));
+        primaryController.cleanResultsPanel();
+        for (PluginOutput plugOut : result) {
+            for (Result res : plugOut.getStringResult()) {
+                SimpleResultSample sample = WindowFactory.getPluginSimpleResult();
+                sample.setDescription(res.getDescription());
+                sample.setValue(res.getValue());
 
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            System.out.println("Error on saving plugins result: " + e);
-        }
-        finally
-        {
-            if (writer != null)
-            {
-                try {
-                    writer.flush();
-                    writer.close();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                    System.out.println("Error on flushing and closing csv file from plugin: " + e);
-                }
+                primaryController.addResult(sample);
+
             }
         }
     }

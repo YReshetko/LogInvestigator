@@ -74,6 +74,7 @@ public class ProcessLog implements Callable<List<PluginOutput>>
         final List<PluginOutput> output = new ArrayList<>();
         if(needsProcessor)
         {
+            processors.get(0).getResult();
             processors.forEach(processor -> output.add(processor.getResult()));
         }
         return output;

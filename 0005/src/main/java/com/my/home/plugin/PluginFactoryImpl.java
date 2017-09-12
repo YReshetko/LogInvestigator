@@ -43,7 +43,8 @@ public class PluginFactoryImpl implements IPluginFactory
             }
             else
             {
-                file = new File(dir.getAbsoluteFile() + "/" + file.getName());
+                //file = new File(dir.getAbsoluteFile() + "/" + file.getName());
+                file = copyPluginToDir(dir, file);
             }
             Plugin pluginDescription = getResourceFromJar(file);
             List<PluginDescription> descriptions =  pluginDescription.getPlugins();

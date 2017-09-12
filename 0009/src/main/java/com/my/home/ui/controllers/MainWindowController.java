@@ -4,8 +4,10 @@ import com.my.home.factory.SpringBeanFactory;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
 import com.my.home.ui.App;
+import com.my.home.ui.controllers.result.SimpleResultSample;
 import com.my.home.ui.plugin.PluginSample;
 import com.my.home.ui.windows.WindowFactory;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -43,6 +45,9 @@ public class MainWindowController implements IUIController
 
     @FXML
     private VBox pluginPanel;
+
+    @FXML
+    private VBox results;
 
     @FXML
     private BorderPane rootElement;
@@ -289,5 +294,22 @@ public class MainWindowController implements IUIController
     private boolean isBlockPluginEmpty()
     {
         return !blockPlugins.entrySet().stream().anyMatch(entry -> entry.getValue() != null && entry.getValue().size() > 0);
+    }
+
+
+    public void cleanResultsPanel()
+    {
+        //results.getChildren().clear();
+        Platform.runLater(() -> {
+            results.getChildren().clear();
+        });
+    }
+
+    public void addResult(SimpleResultSample result)
+    {
+        Platform.runLater(() -> {
+            results.getChildren().add(result.getNode());
+        });
+
     }
 }
