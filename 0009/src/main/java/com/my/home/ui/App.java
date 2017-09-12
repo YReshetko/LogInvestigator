@@ -33,6 +33,7 @@ import com.my.home.ui.tree.ILogTreeListener;
 import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
+import com.my.home.util.CsvUtil;
 import com.my.home.util.FileChooserUtil;
 import javafx.event.ActionEvent;
 import javafx.scene.Parent;
@@ -641,13 +642,39 @@ public class App implements ILogTreeListener
     public void setPluginWorkOutput(List<PluginOutput> result)
     {
         result.forEach(System.out::println);
-        for (PluginOutput plugOut : result)
+        String csvFile = "PluginResult.csv";
+        FileWriter writer = null;
+        try
         {
-            for (Result res : plugOut.getStringResult())
-            {
-                System.out.println(res.getDescription() + " : " + res.getValue());
-            }
+            writer = new FileWriter(csvFile);
+            CsvUtil.writeLine(writer, Arrays.asList("Description", "Value"));
+            for (PluginOutput plugOut : result) {
+                for (Result res : plugOut.getStringResult()) {
+                    //System.out.println(res.getDescription() + " : " + res.getValue());
+                    CsvUtil.writeLine(writer, Arrays.asList(res.getDescription(), res.getValue()));
 
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("Error on saving plugins result: " + e);
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                try {
+                    writer.flush();
+                    writer.close();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.out.println("Error on flushing and closing csv file from plugin: " + e);
+                }
+            }
         }
     }
 
