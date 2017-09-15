@@ -5,11 +5,13 @@ import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
 import com.my.home.ui.App;
 import com.my.home.ui.controllers.result.SimpleResultSample;
+import com.my.home.ui.controllers.result.TableResultSample;
 import com.my.home.ui.plugin.PluginSample;
 import com.my.home.ui.windows.WindowFactory;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeView;
@@ -307,9 +309,16 @@ public class MainWindowController implements IUIController
 
     public void addResult(SimpleResultSample result)
     {
+        addResult(result.getNode());
+    }
+    public void addResult(TableResultSample result)
+    {
+        addResult(result.getNode());
+    }
+    private void addResult(Node node)
+    {
         Platform.runLater(() -> {
-            results.getChildren().add(result.getNode());
+            results.getChildren().add(node);
         });
-
     }
 }

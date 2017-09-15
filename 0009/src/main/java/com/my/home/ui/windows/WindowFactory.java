@@ -5,6 +5,8 @@ import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.PluginController;
 import com.my.home.ui.controllers.result.SimpleResultController;
 import com.my.home.ui.controllers.result.SimpleResultSample;
+import com.my.home.ui.controllers.result.TableResultController;
+import com.my.home.ui.controllers.result.TableResultSample;
 import com.my.home.ui.plugin.PluginSample;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -22,6 +24,7 @@ public class WindowFactory
 {
     private static final String PLUGIN_SAMPLE_FXML = "plugin/pluginSample.fxml";
     private static final String PLUGIN_SIMPLE_RESULT_FXML = "plugin/result/sipleResult.fxml";
+    private static final String PLUGIN_TABLE_RESULT_FXML = "plugin/result/tableResult.fxml";
     public static Map<WindowDescriptor, IUIController> controllerMap = new HashMap<>();
     public static Stage getStage(WindowDescriptor descriptor) throws IOException
     {
@@ -71,6 +74,23 @@ public class WindowFactory
                 Parent node = loader.load();
                 SimpleResultController controller = loader.getController();
                 SimpleResultSample sample = new SimpleResultSample(node, controller);
+                return sample;
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+    public static TableResultSample getPluginTableResult()
+        {
+            try{
+                FXMLLoader loader = new FXMLLoader(WindowFactory.class.getResource(PLUGIN_TABLE_RESULT_FXML));
+                Parent node = loader.load();
+                TableResultController controller = loader.getController();
+                TableResultSample sample = new TableResultSample(node, controller);
                 return sample;
             }
             catch (IOException e)

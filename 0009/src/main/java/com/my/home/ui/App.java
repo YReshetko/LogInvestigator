@@ -7,10 +7,7 @@ import com.my.home.log.manager.MainLogManager;
 import com.my.home.log.manager.web.WebLogManager;
 import com.my.home.parser.ParserManager;
 import com.my.home.plugin.*;
-import com.my.home.plugin.model.PluginOutput;
-import com.my.home.plugin.model.PluginToStore;
-import com.my.home.plugin.model.PluginType;
-import com.my.home.plugin.model.Result;
+import com.my.home.plugin.model.*;
 import com.my.home.plugin.processing.ILogPluginProcessing;
 import com.my.home.plugin.processing.LogPluginProcessingImpl;
 import com.my.home.plugin.processing.ProcessingConfigurationBean;
@@ -30,6 +27,7 @@ import com.my.home.task.executor.AppTaskExecutor;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.MainWindowController;
 import com.my.home.ui.controllers.result.SimpleResultSample;
+import com.my.home.ui.controllers.result.TableResultSample;
 import com.my.home.ui.tree.ILogTreeListener;
 import com.my.home.ui.tree.LogTreeController;
 import com.my.home.ui.windows.WindowDescriptor;
@@ -656,6 +654,12 @@ public class App implements ILogTreeListener
 
                 primaryController.addResult(sample);
 
+            }
+            for (TableResult res : plugOut.getTableResult())
+            {
+                TableResultSample sample = WindowFactory.getPluginTableResult();
+                sample.setValue(res);
+                primaryController.addResult(sample);
             }
         }
     }

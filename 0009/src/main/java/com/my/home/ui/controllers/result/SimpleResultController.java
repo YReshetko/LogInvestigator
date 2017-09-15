@@ -7,11 +7,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Yurchik
- * Date: 12.09.17
- * Time: 17:04
- * To change this template use File | Settings | File Templates.
+ * Simple result from plugin to UI
  */
 public class SimpleResultController
 {
