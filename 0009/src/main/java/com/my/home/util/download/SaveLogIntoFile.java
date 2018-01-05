@@ -4,9 +4,9 @@ import com.my.home.log.LogNodeParser;
 import com.my.home.log.beans.LogNode;
 import com.my.home.processor.ILogProgress;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.*;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
@@ -38,14 +38,28 @@ public class SaveLogIntoFile implements Callable<File>
     @Override
     public File call() throws Exception
     {
+        long time = System.currentTimeMillis();
+        //IOSaving();
+        NIOBufferedSaving();
+        //NIOUnbufferedSaving();
+        //AlgorithmParsing();
+        time = System.currentTimeMillis() - time;
+        System.out.println("Time taken - " + time + "ms.");
+        return fileToSave;
+    }
+
+    private void IOSaving()
+    {
+        System.out.println("IO Processing");
         FileWriter writer = null;
-        progress.setTotalSize(this.size);
+        progress.addTotalSize(this.size);
         try
         {
             if(fileToSave != null)
             {
                 writer = new FileWriter(fileToSave);
                 StringBuffer buffer;
+                long time = System.currentTimeMillis();
                 while (nodes.hasNext())
                 {
                     LogNode node = nodes.next();
@@ -78,6 +92,77 @@ public class SaveLogIntoFile implements Callable<File>
                 }
             }
         }
-        return fileToSave;
+    }
+
+    private void NIOBufferedSaving()
+    {
+        System.out.println("NIO Processing");
+        progress.addTotalSize(this.size);
+        if(fileToSave != null)
+        {
+            Charset charset = Charset.forName("UTF-8");
+            Path file = Paths.get(fileToSave.getAbsolutePath());
+            try (BufferedWriter writer = Files.newBufferedWriter(file, charset))
+            {
+                StringBuffer buffer;
+                while (nodes.hasNext())
+                {
+                    LogNode node = nodes.next();
+                    buffer = new StringBuffer();
+                    buffer.append(parser.parse(node));
+                    buffer.append(NEW_LINE);
+                    writer.write(buffer.toString());
+                    progress.subtractSize(1L);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void NIOUnbufferedSaving()
+    {
+        System.out.println("Unbuffered NIO Processing");
+        progress.addTotalSize(this.size);
+        if(fileToSave != null)
+        {
+            Path file = Paths.get(fileToSave.getAbsolutePath());
+            try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, StandardOpenOption.CREATE, StandardOpenOption.WRITE)))
+            {
+                StringBuffer buffer;
+                while (nodes.hasNext())
+                {
+                    LogNode node = nodes.next();
+                    buffer = new StringBuffer();
+                    buffer.append(parser.parse(node));
+                    buffer.append(NEW_LINE);
+                    out.write(buffer.toString().getBytes());
+                    progress.subtractSize(1L);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void AlgorithmParsing()
+    {
+        System.out.println("Algorithm without parsing Processing");
+        progress.addTotalSize(this.size);
+        if(fileToSave != null)
+        {
+            StringBuffer buffer;
+            while (nodes.hasNext())
+            {
+                LogNode node = nodes.next();
+               /* buffer = new StringBuffer();
+                buffer.append(parser.parse(node));
+                buffer.append(NEW_LINE);
+                buffer.toString();*/
+                progress.subtractSize(1L);
+            }
+        }
     }
 }

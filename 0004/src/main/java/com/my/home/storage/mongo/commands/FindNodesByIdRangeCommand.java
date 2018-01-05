@@ -20,13 +20,10 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
     private long size;
     public FindNodesByIdRangeCommand(List<LogIdRange> ranges, int rangeSize)
     {
-
         Collections.sort(ranges, (o1, o2) -> o1.getFirstId().compareTo(o2.getFirstId()));
         this.size = 0L;
-        //this.ranges = ranges;
-        this.ranges = spliceRanges(ranges);
         this.rangeSize = rangeSize;
-
+        this.ranges = spliceRanges(ranges);
     }
 
     /**
@@ -126,6 +123,10 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
             {
                 listRanges.add(range1);
             }
+        }
+        if(listRanges != null && !listRanges.isEmpty())
+        {
+            out.add(listRanges);
         }
 
         return out;
