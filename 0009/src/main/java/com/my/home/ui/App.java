@@ -21,6 +21,7 @@ import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
 import com.my.home.storage.mongo.plugin.MongoPluginStorage;
+import com.my.home.task.AfterDownloadTask;
 import com.my.home.task.AfterParseLogTask;
 import com.my.home.task.AfterProcessingLogTask;
 import com.my.home.task.executor.AppTaskExecutor;
@@ -34,6 +35,7 @@ import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.CsvUtil;
 import com.my.home.util.FileChooserUtil;
+import com.my.home.util.download.SaveLogIntoFile;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Parent;
@@ -49,7 +51,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 /**
@@ -104,6 +108,11 @@ public class App implements ILogTreeListener
     private MainLogManager logManager;
 
     private String logSavingStrategy;
+
+    private int maxLogRequestRangeSize;
+    private ILogProgress progress;
+
+
 
     /**
      * TODO Initialize the processing similar as "private ILogStorage storage;"
@@ -162,7 +171,7 @@ public class App implements ILogTreeListener
         final ILogSaver saver = new MongoLogSaver(connection);
         final ILogRetriever retriever = new MongoLogRetriever(connection);
         final ILogNodeParser parser = parserManager.getParser("default");
-        final ILogProgress progress = new ProgressManager(primaryController.getProgressBar());
+        progress = new ProgressManager(primaryController.getProgressBar());
         taskExecutor.setProgressManager(progress);
         ILogStorageContext context = new ILogStorageContext()
         {
@@ -465,6 +474,13 @@ public class App implements ILogTreeListener
     {
         this.pluginDir = pluginDir;
     }
+    public int getMaxLogRequestRangeSize() {
+        return maxLogRequestRangeSize;
+    }
+
+    public void setMaxLogRequestRangeSize(int maxLogRequestRangeSize) {
+        this.maxLogRequestRangeSize = maxLogRequestRangeSize;
+    }
 
     public void setLogSavingStrategy(String logSavingStrategy)
     {
@@ -720,68 +736,22 @@ public class App implements ILogTreeListener
     {
         ILogIdentifier identifier = logManager.getIdentifier();
         List<String> logThreads = Arrays.asList(threadName);
-        File fileToOpen = downloadThreads(identifier, logThreads);
-        if (fileToOpen != null)
-        {
-            try
-            {
-                Desktop.getDesktop().open(fileToOpen);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
+        downloadThreads(identifier, logThreads);
+
     }
-    public File downloadThreads(ILogIdentifier identifier, List<String> logThreads)
+    public void downloadThreads(ILogIdentifier identifier, List<String> logThreads)
     {
         if(logThreads.size() > 0)
         {
-            /*List<LogNode> nodes = new ArrayList<>(logThreads.size());
-            logThreads.forEach(thread -> {
-                LogNode node = new LogNode();
-                node.setThread(thread);
-                nodes.add(node);
-            });*/
-            //  TODO create command where log nodes will be chosen by ID
             ILogStorageCommand<LogNode> command = prepareLogNodeRequestByIdRanges(identifier, logThreads);
-            //command.setData(identifier, nodes.toArray());
-            String fileTestToSave = storage.getLog(identifier, command);
+            //String fileTestToSave = storage.getLog(identifier, command);
+            Iterator<LogNode> logNodes = storage.getIterator(identifier, command);
             File file = FileChooserUtil.saveFile(getStageByName(null), "Save file", logThreads.get(0) + ".log", "*.log");
-            FileWriter writer = null;
-            try
-            {
-                if(file != null)
-                {
-                    writer = new FileWriter(file);
-                    writer.write(fileTestToSave);
-                    writer.flush();
-                }
-            }
-            catch (IOException e)
-            {
-                file = null;
-                e.printStackTrace();
-            }
-            finally
-            {
-                if(writer != null)
-                {
-                    try
-                    {
-                        writer.close();
-                    }
-                    catch (IOException e)
-                    {
-                        file = null;
-                        e.printStackTrace();
-                    }
-                }
-                return file;
-            }
-
+            Callable<File> downloadLog = new SaveLogIntoFile(logNodes, file, parserManager.getParser("default"), progress, command.getSize());
+            FutureTask<File> future = new FutureTask<>(downloadLog);
+            new Thread(future).start();
+            taskExecutor.addTask(new AfterDownloadTask(future));
         }
-        return null;
     }
 
     private ILogStorageCommand<LogNode> prepareLogNodeRequestByIdRanges(ILogIdentifier identifier, List<String> logThreads)
@@ -801,7 +771,7 @@ public class App implements ILogTreeListener
             descIter.forEachRemaining(descript -> {
                 descript.getIdRanges().forEach(range -> ranges.add(range));
             });
-            selectNodes = new FindNodesByIdRangeCommand(ranges);
+            selectNodes = new FindNodesByIdRangeCommand(ranges, maxLogRequestRangeSize);
         }
         return selectNodes;
     }

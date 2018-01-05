@@ -14,6 +14,7 @@
       <property name="parserManager" ref="ParserManager"/>
       <property name="pluginDir" value="d:/plugins/"/>
       <property name="logSavingStrategy" value="ASYNC"/>
+      <property name="maxLogRequestRangeSize" value="100"/>
   </bean>
 
     <bean id="StorageManager" class="com.my.home.storage.MongoStorageManager" lazy-init="true">

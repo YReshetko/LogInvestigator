@@ -70,6 +70,11 @@ public abstract class AbstractStorageCommand<V> implements ILogStorageCommand<V>
     }
 
     @Override
+    public List<String> getSelectors() {
+        return null;
+    }
+
+    @Override
     public String getOldValue() {
         return null;
     }
@@ -77,6 +82,10 @@ public abstract class AbstractStorageCommand<V> implements ILogStorageCommand<V>
     @Override
     public String getNewValue() {
         return null;
+    }
+    @Override
+    public long getSize(){
+        return 0L;
     }
 
     protected String split(List<String> buff)

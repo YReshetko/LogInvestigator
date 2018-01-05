@@ -7,7 +7,10 @@ import com.mongodb.util.JSON;
 import com.my.home.storage.mongo.IMongoLogAccess;
 import com.my.home.util.JsonUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -56,6 +59,15 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
         }
         return new LogIterator(cursor, aClass);
     }
+
+    @Override
+    public <V> Iterator<V> find(List<String> searchKey)
+    {
+        DBCursor cursor = null;
+        sort = getSorter();
+        return new LogIterator(searchKey, collection, sort, aClass);
+    }
+
 
     @Override
     public void insert(String value) {
@@ -109,10 +121,21 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
 
         private DBCursor cursor;
         private Class<V> vClass;
+        private Iterator<String> selectors;
+        private DBCollection collection;
+        private DBObject sort;
         public LogIterator(DBCursor cursor, Class<V> vClass)
         {
             this.cursor = cursor;
             this.vClass = vClass;
+        }
+
+        public LogIterator(List<String> selectors, DBCollection collection, DBObject sort, Class<V> vClass)
+        {
+            this.vClass = vClass;
+            this.selectors = (selectors != null)?selectors.iterator():null;
+            this.collection = collection;
+            this.sort = sort;
         }
         /**
          * Returns {@code true} if the iteration has more elements.
@@ -122,8 +145,31 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
          * @return {@code true} if the iteration has more elements
          */
         @Override
-        public boolean hasNext() {
-            return cursor.hasNext();
+        public boolean hasNext()
+        {
+            boolean hasNext = false;
+            if (cursor != null)
+            {
+                hasNext = cursor.hasNext();
+            }
+            if (!hasNext)
+            {
+                if(selectors != null && selectors.hasNext())
+                {
+                    String selector = selectors.next();
+                    if(sort == null)
+                    {
+                        cursor = collection.find((DBObject) JSON.parse(selector));
+                    }
+                    else
+                    {
+                        cursor = collection.find((DBObject) JSON.parse(selector)).sort(sort);
+                    }
+                    hasNext = cursor.hasNext();
+                }
+            }
+
+            return hasNext;
         }
 
         /**
