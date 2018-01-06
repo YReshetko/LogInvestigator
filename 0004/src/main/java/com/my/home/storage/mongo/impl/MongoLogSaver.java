@@ -36,7 +36,7 @@ public class MongoLogSaver extends MongoLogBase implements ILogSaver
         return save(identifier, descriptor);
     }
 
-    private <V> boolean save(ILogIdentifier identifier, V value) {
+    protected <V> boolean save(ILogIdentifier identifier, V value) {
         IMongoLogAccess access = getAccess(identifier, getCollection(value.getClass()));
         access.insert(JsonUtils.getJson(value));
         return true;

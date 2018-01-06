@@ -124,7 +124,7 @@ public class FindNodesByIdRangeCommand extends AbstractStorageCommand<LogNode>
                 listRanges.add(range1);
             }
         }
-        if(listRanges != null && !listRanges.isEmpty())
+        if(!listRanges.isEmpty())
         {
             out.add(listRanges);
         }

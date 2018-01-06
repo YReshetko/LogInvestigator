@@ -132,7 +132,7 @@ ali.SampleThread = function(thread, backgroundColor, borderColor, path)
 {
 	var threadName = thread["threadName"];
 	this._threadName = thread["threadName"];
-	this._minWidth = 120;
+	this._minWidth = 220;
 	var threadStyle =
 	{
 		position: "absolute",

@@ -17,6 +17,7 @@ import com.my.home.processor.ILogStorageCommand;
 import com.my.home.progress.ProgressManager;
 import com.my.home.storage.*;
 import com.my.home.storage.mongo.commands.*;
+import com.my.home.storage.mongo.impl.BufferedMongoLogSaver;
 import com.my.home.storage.mongo.impl.MongoConnection;
 import com.my.home.storage.mongo.impl.MongoLogRetriever;
 import com.my.home.storage.mongo.impl.MongoLogSaver;
@@ -168,7 +169,8 @@ public class App implements ILogTreeListener
      */
     private void initNewContext()
     {
-        final ILogSaver saver = new MongoLogSaver(connection);
+        //final ILogSaver saver = new MongoLogSaver(connection);
+        final ILogSaver saver = new BufferedMongoLogSaver(connection);
         final ILogRetriever retriever = new MongoLogRetriever(connection);
         final ILogNodeParser parser = parserManager.getParser("default");
         progress = new ProgressManager(primaryController.getProgressBar());

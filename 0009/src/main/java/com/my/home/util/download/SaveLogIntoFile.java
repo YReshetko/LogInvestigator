@@ -39,10 +39,7 @@ public class SaveLogIntoFile implements Callable<File>
     public File call() throws Exception
     {
         long time = System.currentTimeMillis();
-        //IOSaving();
         NIOBufferedSaving();
-        //NIOUnbufferedSaving();
-        //AlgorithmParsing();
         time = System.currentTimeMillis() - time;
         System.out.println("Time taken - " + time + "ms.");
         return fileToSave;
@@ -59,7 +56,6 @@ public class SaveLogIntoFile implements Callable<File>
             {
                 writer = new FileWriter(fileToSave);
                 StringBuffer buffer;
-                long time = System.currentTimeMillis();
                 while (nodes.hasNext())
                 {
                     LogNode node = nodes.next();

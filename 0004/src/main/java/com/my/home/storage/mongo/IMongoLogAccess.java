@@ -20,4 +20,16 @@ public interface IMongoLogAccess<V>
     void removeAll();
     void remove(String value);
     void setSortBy(String field);
+
+    /**
+     * Methods used with buffered saving
+     * @param value - document to save
+     */
+    void add(String value);
+
+    /**
+     * Send all collected documents to Mongo DB
+     * @return - true if it's completed
+     */
+    boolean flush();
 }

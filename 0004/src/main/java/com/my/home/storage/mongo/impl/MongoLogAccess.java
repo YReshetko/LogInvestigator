@@ -7,10 +7,10 @@ import com.mongodb.util.JSON;
 import com.my.home.storage.mongo.IMongoLogAccess;
 import com.my.home.util.JsonUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
@@ -23,10 +23,19 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
     private DBObject sort;
     private Class<V> aClass;
     private String sortBy;
+    private final ReadWriteLock lock;
+    private final Lock readLock;
+    private final Lock writeLock;
+
+    private List<DBObject> buffer;
     public MongoLogAccess(DBCollection collection, Class<V> aClass)
     {
         this.collection = collection;
         this.aClass = aClass;
+        lock = new ReentrantReadWriteLock();
+        readLock = lock.readLock();
+        writeLock = lock.writeLock();
+        buffer = new LinkedList<>();
     }
 
     @Override
@@ -102,6 +111,39 @@ public class MongoLogAccess<V> implements IMongoLogAccess<V>
     @Override
     public void setSortBy(String field) {
         sortBy = field;
+    }
+
+    /**
+     * Methods used with buffered saving
+     *
+     * @param value - document to save
+     */
+    @Override
+    public void add(String value)
+    {
+        DBObject toAdd = (DBObject) JSON.parse(value);
+        writeLock.lock();
+            buffer.add(toAdd);
+        writeLock.unlock();
+    }
+
+    /**
+     * Send all collected documents to Mongo DB
+     *
+     * @return - true if it's completed
+     */
+    @Override
+    public boolean flush()
+    {
+        writeLock.lock();
+        List<DBObject> toInsert = buffer;
+        buffer = new LinkedList<>();
+        writeLock.unlock();
+        if (!toInsert.isEmpty())
+        {
+            collection.insert(toInsert);
+        }
+        return true;
     }
 
     private DBObject getSorter()
