@@ -1,5 +1,6 @@
 package com.my.home.storage;
 
+import com.my.home.BaseLogger;
 import com.my.home.storage.mongo.impl.MongoConnection;
 
 import java.io.*;
@@ -8,7 +9,7 @@ import java.util.Properties;
 /**
  *
  */
-public class MongoStorageManager
+public class MongoStorageManager extends BaseLogger
 {
 
     private static final String COMMAND_TO_RUN_DB = "\"%s/mongod.exe\" --dbpath \"%s\"";
@@ -31,7 +32,7 @@ public class MongoStorageManager
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            error("Error loading mongo properties from file " + path, e);
         }
     }
 
@@ -57,7 +58,7 @@ public class MongoStorageManager
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            error("Error saving mongo properties", e);
         }
     }
     public MongoConnection getConnection()
@@ -85,11 +86,10 @@ public class MongoStorageManager
         dbProcess.start();
         while (true)
         {
-            System.out.print("");
             boolean isConnected = dbProcess.isConnected();
             if (isConnected)
             {
-                System.out.println("MONGO CONNECTED");
+                log("MONGO CONNECTED");
                 break;
             }
             if(dbProcess.checkIfInterrupted())
@@ -97,7 +97,7 @@ public class MongoStorageManager
                 throw new RuntimeException("Can't create connection");
             }
         }
-        System.out.println("FINISH STORAGE INITIALIZATION");
+        log("FINISH STORAGE INITIALIZATION");
     }
     public void closeDB()
     {

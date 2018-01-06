@@ -3,6 +3,8 @@ package com.my.home.task.executor;
 import com.my.home.processor.ILogProgress;
 import com.my.home.progress.ProgressManager;
 import com.my.home.task.IAppTask;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
  */
 public class AppTaskExecutor extends Thread
 {
+    private final static Logger logger = LogManager.getLogger(AppTaskExecutor.class.getName());
     private final List<IAppTask> tasks;
     private final ReadWriteLock lock;
     private final Lock readLock;
@@ -68,7 +71,7 @@ public class AppTaskExecutor extends Thread
             }
             else
             {
-                System.out.println("Tasks executor: Waiting new tasks");
+                logger.debug("Tasks executor: Waiting new tasks");
                 isWait = true;
                 try
                 {
@@ -81,7 +84,7 @@ public class AppTaskExecutor extends Thread
                         monitor.wait();
                     }
                     isWait = false;
-                    System.out.println("Tasks executor: Wake up");
+                    logger.debug("Tasks executor: Wake up");
 
                 }
                 catch (InterruptedException e)

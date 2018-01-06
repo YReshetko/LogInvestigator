@@ -1,5 +1,6 @@
 package com.my.home.ui;
 
+import com.my.home.BaseLogger;
 import com.my.home.log.LogIdentifierImpl;
 import com.my.home.log.beans.*;
 import com.my.home.log.manager.ILogManager;
@@ -45,6 +46,8 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.File;
@@ -60,7 +63,7 @@ import java.util.stream.Collectors;
 /**
  *
  */
-public class App implements ILogTreeListener
+public class App extends BaseLogger implements ILogTreeListener
 {
 
     private Map<String, WindowDescriptor> windows;
@@ -126,6 +129,7 @@ public class App implements ILogTreeListener
      */
     public void init(Stage primaryStage)
     {
+        log("Init stage");
         isStageInitialized = false;
         modalWindows = new HashMap<>();
         this.primaryStage = primaryStage;
@@ -139,7 +143,7 @@ public class App implements ILogTreeListener
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            error("Can't init application context", e);
             openModal("storageOption");
         }
     }
@@ -296,20 +300,19 @@ public class App implements ILogTreeListener
             Stage modalStage = modalWindows.get(modal);
             if (modalStage == null)
             {
-                System.out.println("Init modal stage: " + modal);
+                log("Init modal stage: " + modal);
                 modalStage = WindowFactory.getStage(windows.get(modal));
                 modalStage.initModality(Modality.WINDOW_MODAL);
                 modalStage.initOwner(primaryStage);
                 modalWindows.put(modal, modalStage);
             }
             primaryStage.toFront();
-            System.out.println("Show modal stage: " + modal);
+            log("Show modal stage: " + modal);
             modalStage.show();
         }
         catch (IOException e)
         {
-            System.out.println("Cannot open modal window: " + modal);
-            e.printStackTrace();
+            error("Cannot open modal window: " + modal, e);
         }
 
     }
@@ -436,7 +439,7 @@ public class App implements ILogTreeListener
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            error("Can't retrieve window node", e);
             return null;
         }
     }
@@ -511,7 +514,7 @@ public class App implements ILogTreeListener
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            error("Can not init storage process", e);
         }
     }
 
@@ -605,12 +608,12 @@ public class App implements ILogTreeListener
         }
         if (identifier != null && logThreads != null && logThreads.size() > 0)
         {
-            System.out.println("Prepare selector for processing:");
+            log("Prepare selector for processing:");
             logThreads.forEach(System.out::println);
 
             //  TODO Implement pass selected threads into plugin processing
             Map<PluginType, List<PluginToStore>> plugins = primaryController.getPluginsToProcess();
-            plugins.entrySet().forEach(entry -> System.out.println("Plugin type: " + entry.getKey() + "; number: " + entry.getValue().size()));
+            plugins.entrySet().forEach(entry -> log("Plugin type: " + entry.getKey() + "; number: " + entry.getValue().size()));
             if (!plugins.isEmpty())
             {
                 List<IPluginSelector> selectors = new ArrayList<>();
@@ -635,7 +638,7 @@ public class App implements ILogTreeListener
                             entry.getValue().forEach(plugin -> postProcessors.add(pluginFactory.getPlugin(plugin)));
                             break;
                         default:
-                            System.out.println("Unknown plugin type: " + entry.getKey());
+                            log("Unknown plugin type: " + entry.getKey());
                     }
                 }
                 ILogStorageCommand<LogNode> command = prepareLogNodeRequestByIdRanges(identifier, logThreads);
@@ -654,7 +657,7 @@ public class App implements ILogTreeListener
             else
             {
                 //  TODO create UI notification to choose plugin
-                System.out.println("No one plugin was selected");
+                log("No one plugin was selected");
             }
         }
 
@@ -688,7 +691,7 @@ public class App implements ILogTreeListener
         List<String> logThreads = logManager.getSelectedThreads();
         if (logThreads.size() > 0)
         {
-            System.out.println("Prepare selector for processing:");
+            log("Prepare selector for processing:");
             logThreads.forEach(System.out::println);
 
             Iterator<ThreadsInfo> threadsInfoIterator = storage.getIterator(identifier, new FindThreadsInfoCommand());

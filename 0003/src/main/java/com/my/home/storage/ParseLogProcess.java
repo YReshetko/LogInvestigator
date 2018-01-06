@@ -1,5 +1,6 @@
 package com.my.home.storage;
 
+import com.my.home.BaseLogger;
 import com.my.home.log.beans.LogBlock;
 import com.my.home.log.beans.LogNode;
 import com.my.home.processor.ILogProgress;
@@ -17,7 +18,7 @@ import java.util.concurrent.Callable;
 /**
  *
  */
-public class ParseLogProcess implements Callable<ILogIdentifier>
+public class ParseLogProcess extends BaseLogger implements Callable<ILogIdentifier>
 {
 
     private final ILogNodeParser parser;
@@ -92,7 +93,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         }
         catch (ParseException | IOException e)
         {
-            e.printStackTrace();
+            error("Error parsing log", e);
         }
         /*finally
         {
@@ -155,12 +156,12 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
         }
         catch (ParseException e)
         {
-            e.printStackTrace();
+            error("Error creation log blocks", e);
             throw new RuntimeException("Error creation log blocks", e);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            error("Error reading log files for log blocks", e);
             throw new RuntimeException("Error reading log files for log blocks", e);
         }
         finally
@@ -171,7 +172,7 @@ public class ParseLogProcess implements Callable<ILogIdentifier>
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                error("Can't close BufferedReader", e);
             }
         }
 

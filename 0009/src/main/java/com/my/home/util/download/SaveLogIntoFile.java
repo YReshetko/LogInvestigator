@@ -1,5 +1,6 @@
 package com.my.home.util.download;
 
+import com.my.home.BaseLogger;
 import com.my.home.log.LogNodeParser;
 import com.my.home.log.beans.LogNode;
 import com.my.home.processor.ILogProgress;
@@ -13,7 +14,7 @@ import java.util.concurrent.Callable;
 /**
  * Processor to save log into file
  */
-public class SaveLogIntoFile implements Callable<File>
+public class SaveLogIntoFile extends BaseLogger implements Callable<File>
 {
     private static final String NEW_LINE = "\n";
     private Iterator<LogNode> nodes;
@@ -41,13 +42,13 @@ public class SaveLogIntoFile implements Callable<File>
         long time = System.currentTimeMillis();
         NIOBufferedSaving();
         time = System.currentTimeMillis() - time;
-        System.out.println("Time taken - " + time + "ms.");
+        log("Time taken - " + time + "ms.");
         return fileToSave;
     }
 
     private void IOSaving()
     {
-        System.out.println("IO Processing");
+        log("IO Processing");
         FileWriter writer = null;
         progress.addTotalSize(this.size);
         try
@@ -71,7 +72,7 @@ public class SaveLogIntoFile implements Callable<File>
         catch (IOException e)
         {
             fileToSave = null;
-            e.printStackTrace();
+            error("", e);
         }
         finally
         {
@@ -84,7 +85,7 @@ public class SaveLogIntoFile implements Callable<File>
                 catch (IOException e)
                 {
                     fileToSave = null;
-                    e.printStackTrace();
+                    error("", e);
                 }
             }
         }
@@ -92,7 +93,7 @@ public class SaveLogIntoFile implements Callable<File>
 
     private void NIOBufferedSaving()
     {
-        System.out.println("NIO Processing");
+        log("NIO Processing");
         progress.addTotalSize(this.size);
         if(fileToSave != null)
         {
@@ -113,13 +114,13 @@ public class SaveLogIntoFile implements Callable<File>
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                error("", e);
             }
         }
     }
     private void NIOUnbufferedSaving()
     {
-        System.out.println("Unbuffered NIO Processing");
+        log("Unbuffered NIO Processing");
         progress.addTotalSize(this.size);
         if(fileToSave != null)
         {
@@ -139,13 +140,13 @@ public class SaveLogIntoFile implements Callable<File>
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                error("", e);
             }
         }
     }
     private void AlgorithmParsing()
     {
-        System.out.println("Algorithm without parsing Processing");
+        log("Algorithm without parsing Processing");
         progress.addTotalSize(this.size);
         if(fileToSave != null)
         {

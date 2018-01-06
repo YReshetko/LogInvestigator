@@ -1,5 +1,6 @@
 package com.my.home.ui.windows;
 
+import com.my.home.BaseLogger;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.ui.controllers.IUIController;
 import com.my.home.ui.controllers.PluginController;
@@ -12,6 +13,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,6 +25,7 @@ import java.util.Map;
  */
 public class WindowFactory
 {
+    private final static Logger logger = LogManager.getLogger(WindowFactory.class.getName());
     private static final String PLUGIN_SAMPLE_FXML = "plugin/pluginSample.fxml";
     private static final String PLUGIN_SIMPLE_RESULT_FXML = "plugin/result/sipleResult.fxml";
     private static final String PLUGIN_TABLE_RESULT_FXML = "plugin/result/tableResult.fxml";
@@ -62,7 +66,7 @@ public class WindowFactory
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.error("Can't load plugin FXML sample", e);
             return null;
         }
 
@@ -78,7 +82,7 @@ public class WindowFactory
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                logger.error("Can't load plugin result FXML sample", e);
                 return null;
             }
 
@@ -95,7 +99,7 @@ public class WindowFactory
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                logger.error("Can't load plugin table result FXML sample", e);
                 return null;
             }
 

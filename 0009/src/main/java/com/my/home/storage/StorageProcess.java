@@ -1,5 +1,8 @@
 package com.my.home.storage;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class StorageProcess extends Thread
 {
-
+    private final static Logger logger = LogManager.getLogger(StorageProcess.class.getName());
     private static final String DETECT_IF_CONNECTED = "waiting for connections on port";
     private String command;
     private Process dbProcess;
@@ -43,26 +46,26 @@ public class StorageProcess extends Thread
 
                     Matcher matcher = pattern.matcher(line);
                     boolean result = matcher.find();
-                    System.out.println("Find in line:\n" + line + "\n regexp: " + pattern.pattern() + "\n result: " + result);
+                    logger.debug("Find in line:\n" + line + "\n regexp: " + pattern.pattern() + "\n result: " + result);
                     if(result)
                     {
-                        System.out.println("Set connected");
+                        logger.debug("Set connected");
                         isConnected = true;
                     }
                 }
                 else
                 {
-                    System.out.println(line);
+                    logger.debug(line);
                 }
             }
-            System.out.println(dbProcess);
+            logger.debug("Interrupted DB process: " + dbProcess.toString());
             isInterrupted = true;
         }
         catch (IOException e)
         {
             close();
             isInterrupted = true;
-            e.printStackTrace();
+            logger.error("Can not run mongo process", e);
         }
     }
     public void close()

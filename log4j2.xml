@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug" strict="true" name="XMLConfigTest"
+               packages="org.apache.logging.log4j.test">
+    <Properties>
+        <Property name="filename">log/ali.log</Property>
+    </Properties>
+    <Filter type="ThresholdFilter" level="trace"/>
+
+    <Appenders>
+        <Appender type="File" name="File" fileName="${filename}">
+            <Layout type="PatternLayout">
+                <Pattern>%d [%p] [%c] [%t] %m%n</Pattern>
+            </Layout>
+        </Appender>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.my.home.*" level="debug" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
+        <Root level="debug">
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

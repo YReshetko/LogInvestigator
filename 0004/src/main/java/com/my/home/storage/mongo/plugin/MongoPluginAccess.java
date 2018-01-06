@@ -4,6 +4,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import com.my.home.BaseLogger;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.storage.mongo.IMongoPluginAccess;
 import com.my.home.util.JsonUtils;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  *
  */
-public class MongoPluginAccess implements IMongoPluginAccess
+public class MongoPluginAccess extends BaseLogger implements IMongoPluginAccess
 {
     private static final String PARAMS_TEMPLATE = "\"%s\" : \"%s\"";
     private static final String SELECTOR_TEMPLATE = "{ %s }";
@@ -38,7 +39,7 @@ public class MongoPluginAccess implements IMongoPluginAccess
         }
         else
         {
-            System.out.println("Such plugin already exists into storage");
+            log("Such plugin already exists into storage");
             //throw new IllegalArgumentException("Such plugin already exists into storage");
         }
     }

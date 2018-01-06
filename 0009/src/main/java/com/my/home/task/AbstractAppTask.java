@@ -1,12 +1,14 @@
 package com.my.home.task;
 
+import com.my.home.BaseLogger;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
  *
  */
-public abstract class AbstractAppTask<V> implements IAppTask<V>
+public abstract class AbstractAppTask<V> extends BaseLogger implements IAppTask<V>
 {
     private Future<V> future;
     private boolean remove;
@@ -61,7 +63,7 @@ public abstract class AbstractAppTask<V> implements IAppTask<V>
         }
         catch (InterruptedException|ExecutionException e)
         {
-            e.printStackTrace();
+            error("Can't execute the task", e);
         }
         finally
         {

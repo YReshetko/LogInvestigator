@@ -34,11 +34,11 @@ public class AsyncLogSaving extends AbstractSavingStrategy
     public void invalidate(ILogIdentifier identifier) {
         executor.shutdown();
         //  Wait all threads
-        System.out.println("Waiting for termination of thread pull");
+        log("Waiting for termination of thread pull");
         while (!executor.isTerminated())
         {
         }
-        System.out.println("Saving metainf");
+        log("Saving metainf");
         saveMetaInf(identifier, saver);
         saver.complete(identifier);
     }

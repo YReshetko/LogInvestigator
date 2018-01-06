@@ -17,7 +17,7 @@ public class AfterDownloadTask extends AbstractAppTask<File>
 
     @Override
     protected void executeResult(File result) {
-        if (result != null)
+        if (result != null && result.isFile() && result.exists())
         {
             try
             {
@@ -25,7 +25,7 @@ public class AfterDownloadTask extends AbstractAppTask<File>
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                error("Can't open file " + result.getAbsolutePath(), e);
             }
         }
     }

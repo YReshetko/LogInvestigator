@@ -1,5 +1,6 @@
 package com.my.home.ui.controllers;
 
+import com.my.home.BaseLogger;
 import com.my.home.factory.SpringBeanFactory;
 import com.my.home.plugin.model.PluginToStore;
 import com.my.home.plugin.model.PluginType;
@@ -23,7 +24,7 @@ import javafx.stage.FileChooser;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MainWindowController implements IUIController
+public class MainWindowController extends BaseLogger implements IUIController
 {
 
     @FXML
@@ -85,7 +86,7 @@ public class MainWindowController implements IUIController
         mainApp = (App) SpringBeanFactory.getInstance().getBean("Application");
         allPlugins = new HashMap<>();
         blockPlugins = new HashMap<>();
-        System.out.println("Main window controller has been created");
+        log("Main window controller has been created");
     }
     @FXML
     private void handleOptionButton(ActionEvent event)
@@ -225,7 +226,7 @@ public class MainWindowController implements IUIController
                     entry.getValue().stream().filter(sample -> !currentList.contains(sample)).forEach(sample -> currentList.add(sample));
                     if(currentList != null)
                     {
-                        System.out.println("new " +entry.getKey()+ " size = " + currentList.size());
+                        log("new " +entry.getKey()+ " size = " + currentList.size());
                     }
                 });
         clearBlockOfPlugins();

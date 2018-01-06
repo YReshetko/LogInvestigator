@@ -1,5 +1,6 @@
 package com.my.home.storage.strategy;
 
+import com.my.home.BaseLogger;
 import com.my.home.log.beans.LogNode;
 import com.my.home.log.beans.ThreadDescriptor;
 import com.my.home.log.beans.ThreadsInfo;
@@ -16,7 +17,7 @@ import java.util.List;
  * Time: 21:18
  * To change this template use File | Settings | File Templates.
  */
-public abstract class AbstractSavingStrategy implements ILogSavingStrategy
+public abstract class AbstractSavingStrategy extends BaseLogger implements ILogSavingStrategy
 {
     private final LogMetaInfCache cache;
     public AbstractSavingStrategy()

@@ -1,5 +1,6 @@
 package com.my.home.ui.controllers;
 
+import com.my.home.BaseLogger;
 import com.my.home.factory.SpringBeanFactory;
 import com.my.home.ui.App;
 import javafx.event.ActionEvent;
@@ -13,7 +14,7 @@ import java.io.IOException;
 /**
  *
  * */
-public class OptionsController implements IUIController
+public class OptionsController extends BaseLogger implements IUIController
 {
 
 
@@ -50,7 +51,7 @@ public class OptionsController implements IUIController
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            error("Can't handle storage option", e);
         }
     }
 

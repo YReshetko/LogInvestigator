@@ -1,5 +1,6 @@
 package com.my.home.log.manager.web;
 
+import com.my.home.BaseLogger;
 import com.my.home.factory.SpringBeanFactory;
 import com.my.home.log.beans.ThreadsInfo;
 import com.my.home.log.manager.ILogManager;
@@ -22,7 +23,7 @@ import java.util.List;
 /**
  *
  */
-public class WebLogManager implements ILogManager, IWebJsLogManager
+public class WebLogManager extends BaseLogger implements ILogManager, IWebJsLogManager
 {
     private final WebView webView;
     private final WebEngine webEngine;
@@ -34,18 +35,20 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
         webEngine = webView.getEngine();
 
 
-        webEngine.setOnError(error -> System.out.println(error.getMessage()));
+        webEngine.setOnError(error -> error("Web engine error ", error.getException()));
         webEngine.setJavaScriptEnabled(true);
 
         URL url = getClass().getResource("../../../../../../web/index.html");
         try {
-            System.out.println("Url: " + url);
+            log("Url: " + url);
             webEngine.load(url.toExternalForm());
             JSObject jsObject = (JSObject) webEngine.executeScript("window");
             jsObject.setMember("app", this);
             //webEngine.executeScript("init()");
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            error("Error loading threads web view", e);
         }
         app = (App) SpringBeanFactory.getInstance().getBean("Application");
     }
@@ -63,7 +66,7 @@ public class WebLogManager implements ILogManager, IWebJsLogManager
      */
     @Override
     public void download(String value) {
-        System.out.println("Returned value from JS: " + value);
+        log("Returned value from JS: " + value);
         app.downloadThreadAndOpen(value);
     }
 
