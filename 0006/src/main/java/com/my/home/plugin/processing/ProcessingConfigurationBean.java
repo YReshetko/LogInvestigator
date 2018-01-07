@@ -5,6 +5,7 @@ import com.my.home.plugin.IPluginFilter;
 import com.my.home.plugin.IPluginPostProcessor;
 import com.my.home.plugin.IPluginProcessor;
 import com.my.home.plugin.IPluginSelector;
+import com.my.home.processor.ILogProgress;
 import com.my.home.storage.ILogIdentifier;
 
 import java.util.Iterator;
@@ -21,6 +22,10 @@ public class ProcessingConfigurationBean
     private List<IPluginPostProcessor> postProcessors;
     private Iterator<LogNode> log;
     private ILogIdentifier logIdentifier;
+    private long totalSize;
+    private ILogProgress progress;
+
+
 
     public ProcessingConfigurationBean addSelectors(List<IPluginSelector> selectors)
     {
@@ -75,5 +80,20 @@ public class ProcessingConfigurationBean
 
     public ILogIdentifier getLogIdentifier() {
         return logIdentifier;
+    }
+    public long getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
+    }
+
+    public ILogProgress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(ILogProgress progress) {
+        this.progress = progress;
     }
 }

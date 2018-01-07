@@ -609,7 +609,7 @@ public class App extends BaseLogger implements ILogTreeListener
         if (identifier != null && logThreads != null && logThreads.size() > 0)
         {
             log("Prepare selector for processing:");
-            logThreads.forEach(System.out::println);
+            logThreads.forEach(outThread -> log("Selected thread: " + outThread));
 
             //  TODO Implement pass selected threads into plugin processing
             Map<PluginType, List<PluginToStore>> plugins = primaryController.getPluginsToProcess();
@@ -650,6 +650,8 @@ public class App extends BaseLogger implements ILogTreeListener
                         .addProcessors(processors)
                         .addPostProcessors(postProcessors)
                         .addLog(selectedLog);
+                config.setTotalSize(command.getSize());
+                config.setProgress(progress);
                 Future<List<PluginOutput>> outputs = logPluginProcessing.process(config);
                 // TODO may need to add parameters into constructor
                 taskExecutor.addTask(new AfterProcessingLogTask(outputs, this));
@@ -665,7 +667,7 @@ public class App extends BaseLogger implements ILogTreeListener
 
     public void setPluginWorkOutput(List<PluginOutput> result)
     {
-        result.forEach(System.out::println);
+        result.forEach(plugOutput -> log(result.toString()));
         primaryController.cleanResultsPanel();
         for (PluginOutput plugOut : result) {
             for (Result res : plugOut.getStringResult()) {

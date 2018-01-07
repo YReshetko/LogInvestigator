@@ -6,6 +6,7 @@ import com.my.home.plugin.IPluginPostProcessor;
 import com.my.home.plugin.IPluginProcessor;
 import com.my.home.plugin.IPluginSelector;
 import com.my.home.plugin.model.PluginOutput;
+import com.my.home.processor.ILogProgress;
 import com.my.home.storage.ILogStorageContext;
 
 import java.util.ArrayList;
@@ -34,7 +35,14 @@ public class ProcessLog implements Callable<List<PluginOutput>>
     @Override
     public List<PluginOutput> call() throws Exception
     {
-
+        boolean showProgress = false;
+        ILogProgress progress = config.getProgress();
+        long totalSize = config.getTotalSize();
+        if (totalSize > 0)
+        {
+            progress.addTotalSize(totalSize);
+            showProgress = true;
+        }
         List<IPluginSelector> selectors = config.getSelectors();
         /**
          * TODO Uncomment when it will be useful
@@ -69,6 +77,10 @@ public class ProcessLog implements Callable<List<PluginOutput>>
                     processor.process(node);
                 }
 
+            }
+            if(showProgress)
+            {
+                progress.subtractSize(1L);
             }
         }
         final List<PluginOutput> output = new ArrayList<>();
