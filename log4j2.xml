@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="debug" strict="true" name="XMLConfigTest"
-               packages="org.apache.logging.log4j.test">
+<Configuration status="error" strict="true" monitorInterval="30" dest="log/log4j.log">
     <Properties>
         <Property name="filename">log/ali.log</Property>
+        <Property name="level">debug</Property>
     </Properties>
-    <Filter type="ThresholdFilter" level="trace"/>
-
     <Appenders>
         <Appender type="File" name="File" fileName="${filename}">
             <Layout type="PatternLayout">
@@ -13,12 +11,11 @@
             </Layout>
         </Appender>
     </Appenders>
-
     <Loggers>
-        <Logger name="com.my.home.*" level="debug" additivity="false">
+        <Logger name="com.my.home.*" level="${level}" additivity="false">
             <AppenderRef ref="File"/>
         </Logger>
-        <Root level="debug">
+        <Root level="${level}">
             <AppenderRef ref="File"/>
         </Root>
     </Loggers>

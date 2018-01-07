@@ -37,6 +37,7 @@ import com.my.home.ui.windows.WindowDescriptor;
 import com.my.home.ui.windows.WindowFactory;
 import com.my.home.util.CsvUtil;
 import com.my.home.util.FileChooserUtil;
+import com.my.home.util.JsonUtils;
 import com.my.home.util.download.SaveLogIntoFile;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -667,7 +668,10 @@ public class App extends BaseLogger implements ILogTreeListener
 
     public void setPluginWorkOutput(List<PluginOutput> result)
     {
-        result.forEach(plugOutput -> log(result.toString()));
+        if(isLogging())
+        {
+            result.forEach(plugOutput -> log("Plugin output:\n" + JsonUtils.getJson(plugOutput)));
+        }
         primaryController.cleanResultsPanel();
         for (PluginOutput plugOut : result) {
             for (Result res : plugOut.getStringResult()) {
