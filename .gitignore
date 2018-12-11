@@ -5,6 +5,7 @@
 */target
 artifacts
 /lib
+
 out
 /web
 *.csv
